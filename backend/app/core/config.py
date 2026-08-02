@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     supabase_anon_key: str = ""
 
     gemini_api_key: str = ""
-    gemini_eval_model: str = "gemini-2.5-pro"
-    gemini_stt_model: str = "gemini-2.5-flash"
+    gemini_eval_model: str = "gemini-3.5-flash"
+    gemini_stt_model: str = "gemini-3.5-flash"
 
     environment: str = "development"
     cors_origins: str = "http://localhost:3000"

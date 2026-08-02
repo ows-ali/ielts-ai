@@ -32,7 +32,7 @@ async def get_user(user_id: str) -> dict | None:
     data = (
         await client.table("users").select("*").eq("id", user_id).maybe_single().execute()
     )
-    return data.data
+    return data.data if data else None
 
 
 async def create_room(room: dict) -> dict:
@@ -50,7 +50,7 @@ async def get_room_by_code(room_code: str) -> dict | None:
         .maybe_single()
         .execute()
     )
-    return data.data
+    return data.data if data else None
 
 
 async def get_room(room_id: str) -> dict | None:
@@ -58,7 +58,7 @@ async def get_room(room_id: str) -> dict | None:
     data = (
         await client.table("rooms").select("*").eq("id", room_id).maybe_single().execute()
     )
-    return data.data
+    return data.data if data else None
 
 
 async def update_room(room_id: str, payload: dict) -> dict:
@@ -100,7 +100,7 @@ async def get_participant(room_id: str, student_id: str) -> dict | None:
         .maybe_single()
         .execute()
     )
-    return data.data
+    return data.data if data else None
 
 
 async def list_participants(room_id: str) -> list[dict]:
@@ -135,7 +135,7 @@ async def get_question(question_id: str) -> dict | None:
         .maybe_single()
         .execute()
     )
-    return data.data
+    return data.data if data else None
 
 
 async def get_next_question(part: int, exclude_ids: list[str]) -> dict | None:
