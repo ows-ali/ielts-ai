@@ -6,10 +6,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
 import type { Session } from "@supabase/supabase-js";
 
 export function CreateRoomForm({ session }: { session: Session }) {
   const router = useRouter();
+  const handleUnauthorized = useUnauthorizedRedirect();
   const [title, setTitle] = useState("");
   const [part, setPart] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,7 @@ export function CreateRoomForm({ session }: { session: Session }) {
       const room = await api.createRoom(session, title || "Speaking Practice", part);
       router.push(`/teacher/rooms/${room.id}`);
     } catch (err) {
+      await handleUnauthorized(err);
       setError(err instanceof Error ? err.message : "Failed to create room");
     } finally {
       setLoading(false);

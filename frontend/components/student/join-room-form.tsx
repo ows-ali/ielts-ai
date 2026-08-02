@@ -7,9 +7,11 @@ import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
 
 export function JoinRoomForm({ session }: { session: Session }) {
   const router = useRouter();
+  const handleUnauthorized = useUnauthorizedRedirect();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,7 @@ export function JoinRoomForm({ session }: { session: Session }) {
       const room = await api.joinRoom(session, code);
       router.push(`/student/room/${room.id}`);
     } catch (err) {
+      await handleUnauthorized(err);
       setError(err instanceof Error ? err.message : "Failed to join room");
     } finally {
       setLoading(false);

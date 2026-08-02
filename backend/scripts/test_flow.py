@@ -73,6 +73,7 @@ class Flow:
         self.teacher_token = None
         self.student_token = None
         self.room = None
+        self.audio_path = None
 
     def sign_in(self, email: str) -> str:
         resp = self.http.post(
@@ -119,6 +120,7 @@ class Flow:
     def upload_audio(self) -> str:
         self.ensure_audio_bucket()
         path = f"e2e/{self.suffix}.wav"
+        self.audio_path = path
         resp = self.http.post(
             f"{self.url}/storage/v1/object/audio/{path}",
             headers={
@@ -150,6 +152,19 @@ class Flow:
             )
         except Exception as exc:
             print(f"  (cleanup warning) delete room {room_id}: {exc}")
+
+    def delete_audio(self) -> None:
+        if not self.audio_path:
+            return
+        try:
+            self.http.request(
+                "DELETE",
+                f"{self.url}/storage/v1/object/audio",
+                headers=_admin_headers(self.key),
+                json={"prefixes": [self.audio_path]},
+            )
+        except Exception as exc:
+            print(f"  (cleanup warning) delete audio {self.audio_path}: {exc}")
 
     def run(self) -> None:
         t_email = f"e2e_{self.suffix}_teacher@example.com"
@@ -270,6 +285,7 @@ def main() -> None:
             flow.delete_user(flow.student_id)
         if flow.room:
             flow.delete_room(flow.room["id"])
+        flow.delete_audio()
 
     print(f"\n{PASS} passed, {FAIL} failed")
     sys.exit(1 if FAIL else 0)

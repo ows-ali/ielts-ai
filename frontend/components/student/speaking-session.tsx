@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
 import type { Evaluation, TurnState } from "@/lib/types";
 
 const BAND_LABELS: Record<number, string> = {
@@ -42,14 +43,16 @@ export function StudentSpeakingSession({
   const [error, setError] = useState<string | null>(null);
   const alreadyEvaluatedRef = useRef<string | null>(null);
 
+  const handleUnauthorized = useUnauthorizedRedirect();
+
   const refresh = useCallback(async () => {
     try {
       const t = await api.turn(session, roomId);
       setTurn(t);
-    } catch {
-      /* transient */
+    } catch (err) {
+      await handleUnauthorized(err);
     }
-  }, [session, roomId]);
+  }, [session, roomId, handleUnauthorized]);
 
   useEffect(() => {
     refresh();
@@ -62,10 +65,8 @@ export function StudentSpeakingSession({
         refresh
       )
       .subscribe();
-    const interval = setInterval(refresh, 4000);
     return () => {
       supabase.removeChannel(channel);
-      clearInterval(interval);
     };
   }, [refresh, roomId]);
 

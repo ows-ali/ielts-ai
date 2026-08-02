@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
 import type { ClassReport, Participant, Room, TurnState } from "@/lib/types";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -40,6 +41,8 @@ export function TeacherRoomView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleUnauthorized = useUnauthorizedRedirect();
+
   async function refresh() {
     try {
       const [r, p, t] = await Promise.all([
@@ -56,8 +59,8 @@ export function TeacherRoomView({
       } else {
         setReport(null);
       }
-    } catch {
-      /* transient */
+    } catch (err) {
+      await handleUnauthorized(err);
     }
   }
 
@@ -77,10 +80,8 @@ export function TeacherRoomView({
         refresh
       )
       .subscribe();
-    const interval = setInterval(refresh, 5000);
     return () => {
       supabase.removeChannel(channel);
-      clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRoom.id]);

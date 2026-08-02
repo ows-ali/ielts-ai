@@ -37,6 +37,9 @@ export default function LoginPage() {
       }
     );
     if (!res.ok) {
+      if (res.status === 401) {
+        await supabase.auth.signOut();
+      }
       let detail = "Failed to load your profile.";
       try {
         const body = await res.json();
