@@ -5,8 +5,8 @@ from app.services.check import ensure_backend_ready
 from app.services.supabase_client import get_supabase_client
 
 
-def _client():
-    client = get_supabase_client()
+async def _client():
+    client = await get_supabase_client()
     ensure_backend_ready(client, "Supabase")
     return client
 
@@ -18,19 +18,17 @@ async def upsert_user(user: CurrentUser) -> dict:
         "name": user.name or user.email,
         "role": user.role,
     }
-    client = _client()
+    client = await _client()
     data = (
         await client.table("users")
         .upsert(payload, on_conflict="id")
-        .select()
-        .single()
         .execute()
     )
-    return data.data
+    return data.data[0]
 
 
 async def get_user(user_id: str) -> dict | None:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("users").select("*").eq("id", user_id).maybe_single().execute()
     )
@@ -38,13 +36,13 @@ async def get_user(user_id: str) -> dict | None:
 
 
 async def create_room(room: dict) -> dict:
-    client = _client()
-    data = await client.table("rooms").insert(room).select().single().execute()
-    return data.data
+    client = await _client()
+    data = await client.table("rooms").insert(room).execute()
+    return data.data[0]
 
 
 async def get_room_by_code(room_code: str) -> dict | None:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("rooms")
         .select("*")
@@ -56,7 +54,7 @@ async def get_room_by_code(room_code: str) -> dict | None:
 
 
 async def get_room(room_id: str) -> dict | None:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("rooms").select("*").eq("id", room_id).maybe_single().execute()
     )
@@ -64,20 +62,18 @@ async def get_room(room_id: str) -> dict | None:
 
 
 async def update_room(room_id: str, payload: dict) -> dict:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("rooms")
         .update(payload)
         .eq("id", room_id)
-        .select()
-        .single()
         .execute()
     )
-    return data.data
+    return data.data[0]
 
 
 async def list_rooms_for_teacher(teacher_id: str) -> list[dict]:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("rooms")
         .select("*")
@@ -89,13 +85,13 @@ async def list_rooms_for_teacher(teacher_id: str) -> list[dict]:
 
 
 async def add_participant(payload: dict) -> dict:
-    client = _client()
-    data = await client.table("participants").insert(payload).select().single().execute()
-    return data.data
+    client = await _client()
+    data = await client.table("participants").insert(payload).execute()
+    return data.data[0]
 
 
 async def get_participant(room_id: str, student_id: str) -> dict | None:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("participants")
         .select("*")
@@ -108,7 +104,7 @@ async def get_participant(room_id: str, student_id: str) -> dict | None:
 
 
 async def list_participants(room_id: str) -> list[dict]:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("participants")
         .select("*, users(id, name)")
@@ -120,7 +116,7 @@ async def list_participants(room_id: str) -> list[dict]:
 
 
 async def update_participant_status(room_id: str, student_id: str, status: str) -> None:
-    client = _client()
+    client = await _client()
     await (
         client.table("participants")
         .update({"status": status})
@@ -131,7 +127,7 @@ async def update_participant_status(room_id: str, student_id: str, status: str) 
 
 
 async def get_question(question_id: str) -> dict | None:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("questions")
         .select("*")
@@ -143,7 +139,7 @@ async def get_question(question_id: str) -> dict | None:
 
 
 async def get_next_question(part: int, exclude_ids: list[str]) -> dict | None:
-    client = _client()
+    client = await _client()
     query = client.table("questions").select("*").eq("part", part)
     if exclude_ids:
         query = query.not_.in_("id", exclude_ids)
@@ -154,7 +150,7 @@ async def get_next_question(part: int, exclude_ids: list[str]) -> dict | None:
 
 async def get_student_history(student_id: str, limit: int = 5) -> list[dict]:
     """Return the student's previous evaluation feedback (weaknesses)."""
-    client = _client()
+    client = await _client()
     data = (
         await client.table("evaluations")
         .select("feedback, created_at")
@@ -168,19 +164,19 @@ async def get_student_history(student_id: str, limit: int = 5) -> list[dict]:
 
 
 async def insert_answer(payload: dict) -> dict:
-    client = _client()
-    data = await client.table("answers").insert(payload).select().single().execute()
-    return data.data
+    client = await _client()
+    data = await client.table("answers").insert(payload).execute()
+    return data.data[0]
 
 
 async def insert_evaluation(payload: dict) -> dict:
-    client = _client()
-    data = await client.table("evaluations").insert(payload).select().single().execute()
-    return data.data
+    client = await _client()
+    data = await client.table("evaluations").insert(payload).execute()
+    return data.data[0]
 
 
 async def list_evaluations_for_student(student_id: str) -> list[dict]:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("evaluations")
         .select(
@@ -195,7 +191,7 @@ async def list_evaluations_for_student(student_id: str) -> list[dict]:
 
 
 async def list_evaluations_for_room(room_id: str) -> list[dict]:
-    client = _client()
+    client = await _client()
     data = (
         await client.table("evaluations")
         .select("*, answers!inner(room_id, student_id)")

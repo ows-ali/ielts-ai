@@ -42,7 +42,7 @@ async def submit_answer(
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
 
-    ensure_backend_ready(get_supabase_client(), "Supabase")
+    ensure_backend_ready(await get_supabase_client(), "Supabase")
     if not settings.gemini_api_key:
         raise HTTPException(
             status_code=503,

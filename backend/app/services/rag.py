@@ -28,7 +28,7 @@ async def _embed(text: str) -> list[float]:
 
 async def retrieve_ielts_criteria(query: str, top_k: int = 4) -> str:
     """Vector search over the IELTS band-descriptor knowledge base."""
-    client = get_supabase_client()
+    client = await get_supabase_client()
     ensure_backend_ready(client, "Supabase")
     embedding = await _embed(query)
     data = await client.rpc(

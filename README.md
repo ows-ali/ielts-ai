@@ -54,10 +54,12 @@ cp .env.example .env                              # fill in the values
 |---|---|
 | `SUPABASE_URL` | Project URL (Settings → API) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (Settings → API) |
-| `SUPABASE_JWT_SECRET` | JWT Secret (Settings → API) — used to verify auth tokens |
-| `SUPABASE_ANON_KEY` | Anon/publishable key |
+| `SUPABASE_ANON_KEY` | Anon/publishable key — used to verify access tokens against the Auth server |
 | `GEMINI_API_KEY` | Google AI Studio API key |
-| `FRONTEND_URL` | `http://localhost:3000` for local dev |
+| `CORS_ORIGINS` | Comma-separated frontend origins allowed by CORS |
+
+> Note: the backend verifies Supabase access tokens via the Auth server
+> (`/auth/v1/user`), so the JWT secret / JWT Signing Keys are not needed.
 
 ## 3. Run the backend
 

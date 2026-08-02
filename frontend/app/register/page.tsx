@@ -49,6 +49,17 @@ export default function RegisterPage() {
         cache: "no-store",
       }
     );
+    if (!res.ok) {
+      let detail = "Failed to load your profile.";
+      try {
+        const body = await res.json();
+        detail = typeof body.detail === "string" ? body.detail : detail;
+      } catch {
+        /* ignore */
+      }
+      setError(detail);
+      return;
+    }
     const me = await res.json();
     router.replace(me.role === "teacher" ? "/teacher" : "/student");
     router.refresh();

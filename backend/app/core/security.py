@@ -1,5 +1,5 @@
+import httpx
 from fastapi import Depends, HTTPException, Request, status
-from jose import JWTError, jwt
 from pydantic import BaseModel
 
 from app.core.config import settings
@@ -13,21 +13,34 @@ class CurrentUser(BaseModel):
     raw: dict
 
 
-def _decode_token(token: str) -> dict:
-    if not settings.supabase_jwt_secret:
+async def _verify_token_with_auth_server(token: str) -> dict:
+    """Validate the access token against the Supabase Auth server.
+
+    Works with both legacy HS256 and the new asymmetric JWT signing keys.
+    """
+    if not settings.supabase_url or not settings.supabase_anon_key:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Supabase JWT secret is not configured on the server.",
+            detail="Supabase is not configured on this server.",
         )
-    try:
-        return jwt.decode(token, settings.supabase_jwt_secret, algorithms=["HS256"])
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(
+            f"{settings.supabase_url.rstrip('/')}/auth/v1/user",
+            headers={
+                "apikey": settings.supabase_anon_key,
+                "Authorization": f"Bearer {token}",
+            },
         )
+    if resp.status_code == 200:
+        return resp.json()
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
-def get_current_user(request: Request) -> CurrentUser:
+async def get_current_user(request: Request) -> CurrentUser:
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         raise HTTPException(
@@ -35,21 +48,18 @@ def get_current_user(request: Request) -> CurrentUser:
             detail="Missing bearer token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    payload = _decode_token(auth.removeprefix("Bearer ").strip())
+    data = await _verify_token_with_auth_server(auth.removeprefix("Bearer ").strip())
 
-    if not payload.get("sub"):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
-    user_metadata = payload.get("user_metadata") or {}
-    app_metadata = payload.get("app_metadata") or {}
+    user_metadata = data.get("user_metadata") or {}
+    app_metadata = data.get("app_metadata") or {}
     role = user_metadata.get("role") or app_metadata.get("role") or "student"
 
     return CurrentUser(
-        id=payload["sub"],
-        email=payload.get("email"),
-        name=user_metadata.get("name") or payload.get("email"),
+        id=data["id"],
+        email=data.get("email"),
+        name=user_metadata.get("name") or data.get("email"),
         role=role,
-        raw=payload,
+        raw=data,
     )
 
 

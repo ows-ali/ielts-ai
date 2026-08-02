@@ -79,7 +79,7 @@ async def class_report(
 
     common_problems: list[str] = []
     if evals:
-        ensure_backend_ready(get_supabase_client(), "Supabase")
+        ensure_backend_ready(await get_supabase_client(), "Supabase")
         try:
             common_problems = await gemini.summarize_class_problems(evals)
         except Exception:
