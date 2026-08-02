@@ -178,7 +178,7 @@ export function AudioRecorder({
           </div>
           <audio
             controls
-            src={blobUrl}
+            src={blobUrl || undefined}
             className="w-full max-w-sm h-10"
           />
           <div className="flex items-center gap-3">

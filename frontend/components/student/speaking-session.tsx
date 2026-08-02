@@ -114,7 +114,6 @@ export function StudentSpeakingSession({
 
   async function handleRecorded(blob: Blob, mimeType: string) {
     busyRef.current = true;
-    setSubmitting(true);
     setError(null);
     try {
       const supabase = createClient();
@@ -149,7 +148,6 @@ export function StudentSpeakingSession({
       setError(err instanceof Error ? err.message : "Failed to submit answer");
     } finally {
       busyRef.current = false;
-      setSubmitting(false);
     }
   }
 
