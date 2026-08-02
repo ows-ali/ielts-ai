@@ -59,6 +59,7 @@ export interface StudentAttempt {
   room_code?: string | null;
   title?: string | null;
   question: string;
+  audio_url?: string | null;
   transcript?: string | null;
   fluency?: number | null;
   grammar?: number | null;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 
 import { SignOutButton } from "@/components/sign-out-button";
@@ -135,6 +136,9 @@ export function TeacherRoomView({
         </div>
         <div className="flex items-center gap-2">
           <Badge className={STATUS_STYLES[room.status] ?? ""}>{room.status}</Badge>
+          <Link href="/teacher">
+            <Button variant="secondary">Home</Button>
+          </Link>
           <SignOutButton />
         </div>
       </div>

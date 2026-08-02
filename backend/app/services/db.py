@@ -180,7 +180,7 @@ async def list_evaluations_for_student(student_id: str) -> list[dict]:
     data = (
         await client.table("evaluations")
         .select(
-            "id, answers(room_id, rooms(room_code, title), question_id, questions(question), transcript), "
+            "id, answers(room_id, audio_url, rooms(room_code, title), question_id, questions(question), transcript), "
             "fluency, grammar, vocabulary, pronunciation, overall_band, feedback, created_at"
         )
         .eq("student_id", student_id)

@@ -30,6 +30,7 @@ async def student_report(
                 room_code=room.get("room_code"),
                 title=room.get("title"),
                 question=question.get("question") or "",
+                audio_url=answer.get("audio_url"),
                 transcript=answer.get("transcript"),
                 fluency=r.get("fluency"),
                 grammar=r.get("grammar"),

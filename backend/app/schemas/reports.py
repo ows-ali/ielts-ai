@@ -6,6 +6,7 @@ class StudentAttempt(BaseModel):
     room_code: str | None = None
     title: str | None = None
     question: str
+    audio_url: str | None = None
     transcript: str | None = None
     fluency: float | None = None
     grammar: float | None = None

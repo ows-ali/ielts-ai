@@ -131,6 +131,7 @@ describe("TeacherRoomView", () => {
     expect(screen.getByText("Speaking Practice")).toBeInTheDocument();
     expect(screen.getByText("IELTS1234")).toBeInTheDocument();
     expect(screen.getByText(/Part 2/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/teacher");
     expect(await screen.findByText("Alice")).toBeInTheDocument();
     expect(screen.getByText("Students (1)")).toBeInTheDocument();
   });

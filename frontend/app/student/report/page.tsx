@@ -71,6 +71,12 @@ export default async function StudentReportPage() {
                 </div>
               ))}
             </div>
+            {latest.audio_url && (
+              <div className="mt-4">
+                <p className="mb-1 text-xs font-medium text-slate-500">Recorded Audio:</p>
+                <audio controls src={latest.audio_url} className="w-full h-10" />
+              </div>
+            )}
             {latest.feedback && latest.feedback.length > 0 && (
               <div className="mt-4 rounded-lg bg-amber-50 p-4">
                 <p className="text-sm font-semibold text-amber-800">Improve:</p>
@@ -112,7 +118,12 @@ export default async function StudentReportPage() {
                       &ldquo;{a.transcript}&rdquo;
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-slate-400">
+                  {a.audio_url && (
+                    <div className="mt-3">
+                      <audio controls src={a.audio_url} className="w-full h-9" />
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-slate-400">
                     {a.title ? `${a.title} · ` : ""}
                     {a.created_at ? new Date(a.created_at).toLocaleString() : ""}
                   </p>
