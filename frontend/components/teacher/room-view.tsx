@@ -212,16 +212,31 @@ export function TeacherRoomView({
       </div>
       {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
 
-      {turn?.status === "live" && turn.current_student_name && (
-        <Card className="mt-6 border-emerald-200 bg-emerald-50">
-          <CardContent>
-            <p className="text-sm text-emerald-700">
-              Now speaking:{" "}
-              <span className="font-semibold">{turn.current_student_name}</span>
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {room.status === "live" && participants.length > 0 && (() => {
+        const completed = participants.filter(p => p.status === "completed").length;
+        const total = participants.length;
+        const pct = Math.round((completed / total) * 100);
+        return (
+          <Card className="mt-6 border-indigo-200 bg-indigo-50/50">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-indigo-800">
+                  Student progress
+                </p>
+                <span className="text-sm font-bold text-indigo-700">
+                  {completed}/{total} completed
+                </span>
+              </div>
+              <div className="h-2.5 w-full rounded-full bg-indigo-100 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <Card>
@@ -240,11 +255,22 @@ export function TeacherRoomView({
                     key={p.id}
                     className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
                   >
-                    <span className="font-medium">
-                      {p.student_name ?? "Student"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {p.status === "completed" && (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                      )}
+                      {p.status === "speaking" && (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-600 animate-pulse text-xs">●</span>
+                      )}
+                      {p.status === "waiting" && (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">○</span>
+                      )}
+                      <span className="font-medium">
+                        {p.student_name ?? "Student"}
+                      </span>
+                    </div>
                     <Badge className={PARTICIPANT_STYLES[p.status] ?? ""}>
-                      {p.status}
+                      {p.status === "speaking" ? "recording..." : p.status}
                     </Badge>
                   </li>
                 ))}

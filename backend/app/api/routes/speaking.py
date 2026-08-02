@@ -35,8 +35,13 @@ async def submit_answer(
         raise HTTPException(status_code=404, detail="Room not found")
     if room["status"] != "live":
         raise HTTPException(status_code=409, detail="Session is not live")
-    if room.get("current_student_id") != user.id:
-        raise HTTPException(status_code=403, detail="It is not your turn")
+
+    # Verify user is a participant in this room
+    participant = await db.get_participant(room_id, user.id)
+    if not participant:
+        raise HTTPException(status_code=403, detail="You are not a participant in this room")
+    if participant["status"] == "completed":
+        raise HTTPException(status_code=409, detail="You have already submitted your answer")
 
     question = await db.get_question(body.question_id)
     if not question:
@@ -134,8 +139,13 @@ async def submit_answer(
         }
     )
 
+    # Mark this student as completed
     await db.update_participant_status(room_id, user.id, "completed")
-    await _advance_or_end(room_id)
+
+    # Auto-end room if ALL participants have completed
+    counts = await db.count_participants_by_status(room_id)
+    if counts.get("speaking", 0) == 0 and counts.get("waiting", 0) == 0:
+        await db.update_room(room_id, {"status": "ended", "current_student_id": None})
 
     return EvaluationOut(
         id=evaluation["id"],
@@ -147,9 +157,3 @@ async def submit_answer(
         overall_band=evaluation["overall_band"],
         feedback=evaluation["feedback"],
     )
-
-
-async def _advance_or_end(room_id: str) -> None:
-    from app.api.routes.rooms import _pick_next
-
-    await _pick_next(room_id)

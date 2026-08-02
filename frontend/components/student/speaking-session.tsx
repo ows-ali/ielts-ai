@@ -44,6 +44,7 @@ export function StudentSpeakingSession({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const alreadyEvaluatedRef = useRef<string | null>(null);
+  const busyRef = useRef(false);
 
   const handleUnauthorized = useUnauthorizedRedirect();
 
@@ -70,7 +71,7 @@ export function StudentSpeakingSession({
     doRefresh();
 
     const interval = setInterval(() => {
-      doRefresh();
+      if (!busyRef.current) doRefresh();
     }, 2000);
 
     const supabase = createClient();
@@ -87,14 +88,14 @@ export function StudentSpeakingSession({
         "postgres_changes",
         { event: "*", schema: "public", table: "rooms", filter: `id=eq.${roomId}` },
         () => {
-          doRefresh();
+          if (!busyRef.current) doRefresh();
         }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "participants", filter: `room_id=eq.${roomId}` },
         () => {
-          doRefresh();
+          if (!busyRef.current) doRefresh();
         }
       )
       .subscribe();
@@ -117,6 +118,7 @@ export function StudentSpeakingSession({
     turn?.status === "live" && turn.current_student_id === userId;
 
   async function handleRecorded(blob: Blob, mimeType: string) {
+    busyRef.current = true;
     setSubmitting(true);
     setError(null);
     try {
@@ -151,6 +153,7 @@ export function StudentSpeakingSession({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit answer");
     } finally {
+      busyRef.current = false;
       setSubmitting(false);
     }
   }
@@ -221,23 +224,21 @@ export function StudentSpeakingSession({
 
       <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
 
-      {!myTurn && !evaluation && (
+      {turn.status !== "live" && (
         <Card className="mt-6">
           <CardContent className="p-8 text-center">
             <Spinner className="mx-auto h-6 w-6 text-emerald-600" />
             <p className="mt-4 text-slate-600">
-              {turn.current_student_name
-                ? `${turn.current_student_name} is speaking. Wait for your turn.`
-                : "Waiting for the teacher to start the session..."}
+              Waiting for the teacher to start the session...
             </p>
           </CardContent>
         </Card>
       )}
 
-      {myTurn && !evaluation && (
+      {turn.status === "live" && !evaluation && (
         <Card className="mt-6 border-emerald-200">
           <CardHeader>
-            <CardTitle>Your turn</CardTitle>
+            <CardTitle>🎤 Record Your Answer</CardTitle>
           </CardHeader>
           <CardContent>
             {turn.question ? (
@@ -253,19 +254,17 @@ export function StudentSpeakingSession({
                   <AudioRecorder
                     onRecorded={handleRecorded}
                     onStateChange={(rec) => {
+                      busyRef.current = rec;
                       if (rec) setEvaluation(null);
                     }}
+                    maxDuration={turn.question.part === 2 ? 120 : turn.question.part === 3 ? 90 : 60}
+                    maxRetries={2}
                   />
                 </div>
                 {error && (
                   <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
                     {error}
                   </div>
-                )}
-                {submitting && (
-                  <p className="mt-3 flex items-center justify-center gap-2 text-sm text-slate-500">
-                    <Spinner className="h-4 w-4" /> Evaluating your answer...
-                  </p>
                 )}
               </>
             ) : (

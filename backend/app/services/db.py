@@ -126,6 +126,27 @@ async def update_participant_status(room_id: str, student_id: str, status: str) 
     )
 
 
+async def set_all_participants_status(room_id: str, status: str) -> None:
+    """Set all participants in a room to the given status."""
+    client = await _client()
+    await (
+        client.table("participants")
+        .update({"status": status})
+        .eq("room_id", room_id)
+        .execute()
+    )
+
+
+async def count_participants_by_status(room_id: str) -> dict[str, int]:
+    """Return a dict like {"waiting": 0, "speaking": 2, "completed": 3}."""
+    participants = await list_participants(room_id)
+    counts: dict[str, int] = {}
+    for p in participants:
+        s = p.get("status", "waiting")
+        counts[s] = counts.get(s, 0) + 1
+    return counts
+
+
 async def get_question(question_id: str) -> dict | None:
     client = await _client()
     data = (

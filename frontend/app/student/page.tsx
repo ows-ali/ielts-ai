@@ -4,6 +4,7 @@ import { JoinRoomForm } from "@/components/student/join-room-form";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LazyAudio } from "@/components/ui/lazy-audio";
 import { api } from "@/lib/api";
 import { requireStudent } from "@/lib/auth";
 
@@ -77,7 +78,7 @@ export default async function StudentPage() {
                     </div>
                     {a.audio_url && (
                       <div className="pt-1">
-                        <audio controls src={a.audio_url} className="w-full h-9" />
+                        <LazyAudio src={a.audio_url} />
                       </div>
                     )}
                     <p className="text-xs text-slate-400">

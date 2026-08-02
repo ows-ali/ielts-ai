@@ -91,12 +91,17 @@ describe("AudioRecorder", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Stop recording" })).toBeInTheDocument());
     await user.click(screen.getByRole("button", { name: "Stop recording" }));
 
+    // After stopping, a preview with Submit button appears
+    await waitFor(() => expect(screen.getByText("Submit answer")).toBeInTheDocument());
+    expect(screen.getByText(/Re-record/)).toBeInTheDocument();
+
+    await user.click(screen.getByText("Submit answer"));
+
     await waitFor(() => expect(onRecorded).toHaveBeenCalledTimes(1));
     const [blob, mime] = onRecorded.mock.calls[0] as [Blob, string];
     expect(blob.size).toBeGreaterThan(0);
     expect(mime).toBe("audio/mp4;codecs=mp4a.40.2");
     expect(onStateChange).toHaveBeenLastCalledWith(false);
-    expect(screen.getByRole("button", { name: "Start recording" })).toBeInTheDocument();
   });
 
   it("shows an error when microphone access is denied", async () => {

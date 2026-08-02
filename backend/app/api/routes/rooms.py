@@ -113,7 +113,6 @@ async def update_room_status(
     updated = await db.update_room(room_id, {"status": body.status})
     return RoomOut(**updated)
 
-
 @router.get("/{room_id}/turn", response_model=TurnState)
 async def current_turn(
     room_id: str, user: CurrentUser = Depends(get_current_user)
@@ -126,52 +125,20 @@ async def current_turn(
         if room.get("current_question_id")
         else None
     )
-    student_name = None
-    if room.get("current_student_id"):
-        stu = await db.get_user(room["current_student_id"])
-        student_name = stu.get("name") if stu else None
+
+    # In async mode, every student is "current" — return the calling user's own ID
+    # so the frontend shows the recording UI to everyone simultaneously.
+    participant = await db.get_participant(room_id, user.id)
+    is_participant = participant is not None
+    student_name = user.name if is_participant else None
+
     return TurnState(
         room_id=room_id,
-        current_student_id=room.get("current_student_id"),
-        current_student_name=student_name,
+        current_student_id=user.id if (is_participant and room["status"] == "live") else None,
+        current_student_name=student_name if (is_participant and room["status"] == "live") else None,
         question_id=room.get("current_question_id"),
         question=question,
         status=room["status"],
-    )
-
-
-async def _pick_next(room_id: str) -> dict | None:
-    """Advance the room to the next waiting participant. Returns updated room or None."""
-    room = await db.get_room(room_id)
-    if not room:
-        return None
-    participants = await db.list_participants(room_id)
-    waiting = [p for p in participants if p["status"] == "waiting"]
-    if not waiting:
-        return await db.update_room(
-            room_id, {"status": "ended", "current_student_id": None}
-        )
-    next_student = waiting[0]
-    await db.update_participant_status(room_id, next_student["student_id"], "speaking")
-
-    already_used = await db.list_evaluations_for_student(next_student["student_id"])
-    exclude_ids = [
-        (e.get("answers") or {}).get("question_id")
-        for e in already_used
-        if (e.get("answers") or {}).get("question_id")
-    ]
-
-    question = await db.get_next_question(room["part"], exclude_ids)
-    if not question:
-        question = await db.get_next_question(room["part"], [])
-
-    return await db.update_room(
-        room_id,
-        {
-            "current_student_id": next_student["student_id"],
-            "current_question_id": question["id"] if question else None,
-            "status": "live",
-        },
     )
 
 
@@ -189,7 +156,22 @@ async def start_session(
     if not participants:
         raise HTTPException(status_code=400, detail="No students have joined yet")
 
-    room = await _pick_next(room_id)
+    # Pick one question for the whole room
+    question = await db.get_next_question(room["part"], [])
+
+    # Set ALL participants to "speaking" simultaneously
+    await db.set_all_participants_status(room_id, "speaking")
+
+    # Update room to live with the shared question
+    await db.update_room(
+        room_id,
+        {
+            "current_student_id": None,  # No single student — all are speaking
+            "current_question_id": question["id"] if question else None,
+            "status": "live",
+        },
+    )
+
     return await current_turn(room_id, user)
 
 
