@@ -116,11 +116,13 @@ async def _generate_text(url: str, body: dict) -> str:
     import asyncio
     max_retries = 3
     for attempt in range(max_retries):
-        async with httpx.AsyncClient(timeout=60) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(url, json=body)
             if resp.status_code == 429:
+                if settings.groq_api_key:
+                    raise ValueError(f"Gemini API rate limit 429: {resp.text[:300]}")
                 if attempt < max_retries - 1:
-                    await asyncio.sleep(12 * (attempt + 1))
+                    await asyncio.sleep(4 * (attempt + 1))
                     continue
             if resp.status_code != 200:
                 raise ValueError(f"Gemini API error {resp.status_code}: {resp.text[:500]}")

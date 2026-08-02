@@ -108,6 +108,12 @@ export function StudentSpeakingSession({
     setError(null);
     try {
       const supabase = createClient();
+      if (session?.access_token) {
+        await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token || "",
+        });
+      }
       const path = `${roomId}/${userId}/${Date.now()}.webm`;
       const { error: uploadError } = await supabase.storage
         .from("audio")
@@ -233,6 +239,11 @@ export function StudentSpeakingSession({
                     }}
                   />
                 </div>
+                {error && (
+                  <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
+                    {error}
+                  </div>
+                )}
                 {submitting && (
                   <p className="mt-3 flex items-center justify-center gap-2 text-sm text-slate-500">
                     <Spinner className="h-4 w-4" /> Evaluating your answer...

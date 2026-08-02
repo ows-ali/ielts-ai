@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     gemini_eval_model: str = "gemini-3.5-flash"
     gemini_stt_model: str = "gemini-3.5-flash"
 
+    groq_api_key: str = ""
+
     environment: str = "development"
     cors_origins: str = "http://localhost:3000"
 

@@ -54,9 +54,13 @@ export function TeacherRoomView({
       setRoom(r);
       setParticipants(p);
       setTurn(t);
-      if (r.status === "ended") {
-        const rep = await api.classReport(session, initialRoom.id);
-        setReport(rep);
+      if (r.status === "live" || r.status === "ended") {
+        try {
+          const rep = await api.classReport(session, initialRoom.id);
+          setReport(rep);
+        } catch {
+          setReport(null);
+        }
       } else {
         setReport(null);
       }
@@ -78,9 +82,13 @@ export function TeacherRoomView({
         setRoom(r);
         setParticipants(p);
         setTurn(t);
-        if (r.status === "ended") {
-          const rep = await api.classReport(session, initialRoom.id);
-          if (mounted) setReport(rep);
+        if (r.status === "live" || r.status === "ended") {
+          try {
+            const rep = await api.classReport(session, initialRoom.id);
+            if (mounted) setReport(rep);
+          } catch {
+            if (mounted) setReport(null);
+          }
         } else {
           setReport(null);
         }
@@ -90,6 +98,12 @@ export function TeacherRoomView({
     }
 
     doRefresh();
+
+    const interval = setInterval(() => {
+      if (room.status !== "ended") {
+        doRefresh();
+      }
+    }, 3000);
 
     const supabase = createClient();
     const channel = supabase
@@ -112,6 +126,7 @@ export function TeacherRoomView({
 
     return () => {
       mounted = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

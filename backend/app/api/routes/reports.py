@@ -61,7 +61,7 @@ async def class_report(
     evals = await db.list_evaluations_for_room(room_id)
     eval_by_student: dict[str, dict] = {}
     for e in evals:
-        student_id = (e.get("answers") or {}).get("student_id")
+        student_id = e.get("student_id") or (e.get("answers") or {}).get("student_id")
         if student_id and student_id not in eval_by_student:
             eval_by_student[student_id] = e
 

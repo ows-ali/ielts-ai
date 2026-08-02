@@ -35,6 +35,7 @@ alter publication supabase_realtime add table public.rooms, public.participants;
 | `SUPABASE_ANON_KEY` | | ✅ | Supabase anon key (for token verification) |
 | `GEMINI_API_KEY` | | ✅ | Google AI Studio API key |
 | `GEMINI_EVAL_MODEL` | | ✅ | `gemini-3.5-flash` (eval + STT) |
+| `GROQ_API_KEY` | | ✅ | Optional: Groq Cloud API key (`whisper-large-v3-turbo` STT fallback) |
 
 ## Current Status (2026-08-02)
 - ✅ Frontend tests: 38/38 passing, lint clean, typecheck clean
