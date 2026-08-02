@@ -36,7 +36,7 @@ export default async function StudentPage() {
                 Welcome back, {user.name} 👋
               </h1>
               <p className="mt-1 text-sm text-indigo-200/80">
-                Join your teacher's practice session or review your speaking feedback history below.
+                Join your teacher&apos;s practice session or review your speaking feedback history below.
               </p>
             </div>
           </div>

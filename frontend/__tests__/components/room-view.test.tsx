@@ -164,16 +164,17 @@ describe("TeacherRoomView", () => {
     await user.click(startButton);
 
     await waitFor(() => expect(mocks.api.startRoom).toHaveBeenCalledWith(session, "r1"));
+    // After start, refresh is called which calls getRoom + participants (2 calls each)
     await waitFor(() => expect(mocks.api.getRoom.mock.calls.length).toBe(2));
+    await waitFor(() => expect(mocks.api.participants.mock.calls.length).toBe(2));
   });
 
-  it("shows the current speaker during a live turn", async () => {
-    setUpRoom();
-    mocks.api.turn.mockResolvedValue(liveTurn);
-    render(<TeacherRoomView session={session} room={room} initialParticipants={participants} />);
+  it("shows live status when room is live", async () => {
+    setUpRoom(liveRoom);
+    render(<TeacherRoomView session={session} room={liveRoom} initialParticipants={participants} />);
 
-    expect(await screen.findByText(/Now speaking:/)).toBeInTheDocument();
-    expect(screen.getAllByText("Alice").length).toBe(2);
+    expect(await screen.findByText("Session live")).toBeInTheDocument();
+    expect(screen.getByText("Session live")).toBeInTheDocument();
   });
 
   it("shows the class report for an ended room", async () => {

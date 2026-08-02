@@ -43,3 +43,9 @@ class ClassReportOut(BaseModel):
     participants: list[ParticipantScore]
     average_band: float | None = None
     common_problems: list[str]
+
+
+class RoomScoresOut(BaseModel):
+    room_id: str
+    room_code: str
+    participants: list[ParticipantScore]

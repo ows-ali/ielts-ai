@@ -20,6 +20,15 @@ const BAND_LABELS: Record<number, string> = {
   9: "Band 9",
 };
 
+function ScoreBadge({ band, label }: { band: number | null | undefined; label: string }) {
+  return (
+    <div className="rounded-lg bg-slate-50 p-3 text-center">
+      <p className="text-xl font-bold text-slate-900">{band ?? "—"}</p>
+      <p className="text-xs text-slate-500">{label}</p>
+    </div>
+  );
+}
+
 export default async function StudentReportPage() {
   const { user, session } = await requireStudent();
   let report;
@@ -65,10 +74,7 @@ export default async function StudentReportPage() {
                   ["Pronunciation", latest.pronunciation],
                 ] as const
               ).map(([label, value]) => (
-                <div key={label} className="rounded-lg bg-slate-50 p-3">
-                  <p className="text-xl font-bold">{value ?? "—"}</p>
-                  <p className="text-xs text-slate-500">{label}</p>
-                </div>
+                <ScoreBadge key={label} band={value} label={label} />
               ))}
             </div>
             {latest.audio_url && (

@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: ielts-ai
+    env: python
+    plan: free
+    region: frankfurt
+    buildCommand: "PIP_ONLY_BINARY=:all: pip install --no-cache-dir -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/health
+    autoDeploy: true
+    autoDeployTrigger: commit
+    branch: main
+    rootDir: backend
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_EVAL_MODEL
+        value: "gemini-3.5-flash"
+      - key: GEMINI_STT_MODEL
+        value: "gemini-3.5-flash"
+      - key: CORS_ORIGINS
+        value: "https://app-ielts-ai.vercel.app"
+      - key: ENVIRONMENT
+        value: "production"
+      - key: PIP_ONLY_BINARY
+        value: ":all:"

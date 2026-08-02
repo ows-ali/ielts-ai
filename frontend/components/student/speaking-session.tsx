@@ -6,7 +6,6 @@ import type { Session } from "@supabase/supabase-js";
 
 import { AudioRecorder } from "@/components/student/audio-recorder";
 import { Navbar } from "@/components/navbar";
-import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,6 @@ export function StudentSpeakingSession({
   const [turn, setTurn] = useState<TurnState | null>(null);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [classReport, setClassReport] = useState<ClassReport | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const alreadyEvaluatedRef = useRef<string | null>(null);
   const busyRef = useRef(false);
@@ -113,9 +111,6 @@ export function StudentSpeakingSession({
       api.classReport(session, roomId).then(setClassReport).catch(() => {});
     }
   }, [turn?.status, session, roomId]);
-
-  const myTurn =
-    turn?.status === "live" && turn.current_student_id === userId;
 
   async function handleRecorded(blob: Blob, mimeType: string) {
     busyRef.current = true;

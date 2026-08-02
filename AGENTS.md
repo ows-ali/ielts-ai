@@ -59,3 +59,11 @@ alter publication supabase_realtime add table public.rooms, public.participants;
 - Supabase Dashboard: https://supabase.com/dashboard/project/yulczbyfhdsyvbjjqmah
 - Frontend: `http://localhost:3000` (dev)
 - Backend: `http://localhost:8000` (dev), `/api/health`
+
+## Agent Instructions
+
+- When making changes, list only the **file paths modified** — don't output diffs or full file contents unless asked
+- Prefer `edit` tool over `write` for existing files
+- Run `npm test` and `npm run lint` after changes
+- Don't restart dev servers unless explicitly asked
+- **Python commands**: use `.venv\Scripts\python.exe` (e.g., `& ".venv\Scripts\python.exe" -m scripts.test_flow`)

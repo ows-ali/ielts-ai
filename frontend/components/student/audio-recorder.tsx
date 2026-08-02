@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function pickMimeType(): string | undefined {
   const candidates = [
@@ -39,6 +39,17 @@ export function AudioRecorder({
   const chunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const blobUrl = useMemo(() => 
+    pendingBlob ? URL.createObjectURL(pendingBlob.blob) : null, 
+    [pendingBlob]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, [blobUrl]);
 
   const stopInternal = useCallback(() => {
     if (autoStopRef.current) {
@@ -167,7 +178,7 @@ export function AudioRecorder({
           </div>
           <audio
             controls
-            src={URL.createObjectURL(pendingBlob.blob)}
+            src={blobUrl}
             className="w-full max-w-sm h-10"
           />
           <div className="flex items-center gap-3">

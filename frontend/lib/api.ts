@@ -6,6 +6,7 @@ import type {
   Participant,
   Question,
   Room,
+  RoomScoresOut,
   StudentReport,
   TurnState,
   User,
@@ -108,4 +109,7 @@ export const api = {
 
   classReport: (s: Session | null, roomId: string) =>
     request<ClassReport>(`/api/rooms/${roomId}/report`, s),
+
+  roomScores: (s: Session | null, roomId: string) =>
+    request<RoomScoresOut>(`/api/rooms/${roomId}/scores`, s),
 };

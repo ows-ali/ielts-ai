@@ -13,7 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
-import type { ClassReport, Participant, Room, TurnState } from "@/lib/types";
+import type { ClassReport, Participant, Room } from "@/lib/types";
 
 const STATUS_STYLES: Record<string, string> = {
   waiting: "bg-slate-100 text-slate-600",
@@ -38,7 +38,6 @@ export function TeacherRoomView({
 }) {
   const [room, setRoom] = useState(initialRoom);
   const [participants, setParticipants] = useState(initialParticipants);
-  const [turn, setTurn] = useState<TurnState | null>(null);
   const [report, setReport] = useState<ClassReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,14 +46,12 @@ export function TeacherRoomView({
 
   async function refresh() {
     try {
-      const [r, p, t] = await Promise.all([
+      const [r, p] = await Promise.all([
         api.getRoom(session, initialRoom.id),
         api.participants(session, initialRoom.id),
-        api.turn(session, initialRoom.id),
       ]);
       setRoom(r);
       setParticipants(p);
-      setTurn(t);
       if (r.status === "live" || r.status === "ended") {
         try {
           const rep = await api.classReport(session, initialRoom.id);
@@ -74,15 +71,13 @@ export function TeacherRoomView({
     let mounted = true;
     async function doRefresh() {
       try {
-        const [r, p, t] = await Promise.all([
+        const [r, p] = await Promise.all([
           api.getRoom(session, initialRoom.id),
           api.participants(session, initialRoom.id),
-          api.turn(session, initialRoom.id),
         ]);
         if (!mounted) return;
         setRoom(r);
         setParticipants(p);
-        setTurn(t);
         if (r.status === "live" || r.status === "ended") {
           try {
             const rep = await api.classReport(session, initialRoom.id);
@@ -144,8 +139,7 @@ export function TeacherRoomView({
     setLoading(true);
     setError(null);
     try {
-      const t = await api.startRoom(session, initialRoom.id);
-      setTurn(t);
+      await api.startRoom(session, initialRoom.id);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start");

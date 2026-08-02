@@ -56,6 +56,7 @@ export interface Evaluation {
 
 export interface StudentAttempt {
   id: string;
+  room_id?: string | null;
   room_code?: string | null;
   title?: string | null;
   question: string;
@@ -96,4 +97,10 @@ export interface ClassReport {
   participants: ParticipantScore[];
   average_band: number | null;
   common_problems: string[];
+}
+
+export interface RoomScoresOut {
+  room_id: string;
+  room_code: string;
+  participants: ParticipantScore[];
 }

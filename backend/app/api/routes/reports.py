@@ -4,6 +4,7 @@ from app.core.security import CurrentUser, get_current_user, require_teacher
 from app.schemas.reports import (
     ClassReportOut,
     ParticipantScore,
+    RoomScoresOut,
     StudentAttempt,
     StudentReportOut,
 )
@@ -24,9 +25,10 @@ async def student_report(
         answer = r.get("answers") or {}
         room = answer.get("rooms") or {}
         question = answer.get("questions") or {}
-        attempts.append(
+    attempts.append(
             StudentAttempt(
                 id=r["id"],
+                room_id=answer.get("room_id"),
                 room_code=room.get("room_code"),
                 title=room.get("title"),
                 question=question.get("question") or "",
@@ -109,4 +111,49 @@ async def class_report(
         participants=scores,
         average_band=average,
         common_problems=common_problems,
+    )
+
+
+@router.get("/rooms/{room_id}/scores", response_model=RoomScoresOut)
+async def room_scores(
+    room_id: str, user: CurrentUser = Depends(get_current_user)
+) -> RoomScoresOut:
+    room = await db.get_room(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    participants = await db.list_participants(room_id)
+    is_participant = any(p["student_id"] == user.id for p in participants)
+    if not is_participant:
+        raise HTTPException(status_code=403, detail="Not authorized to view this room scores")
+    
+    evals = await db.list_evaluations_for_room(room_id)
+    eval_by_student: dict[str, dict] = {}
+    for e in evals:
+        student_id = e.get("student_id") or (e.get("answers") or {}).get("student_id")
+        if student_id and student_id not in eval_by_student:
+            eval_by_student[student_id] = e
+
+    scores: list[ParticipantScore] = []
+    for p in participants:
+        student = p.get("users") or {}
+        e = eval_by_student.get(p["student_id"])
+        # Only show scores (band and sub-scores), no audio/transcript for other students
+        scores.append(
+            ParticipantScore(
+                student_id=p["student_id"],
+                student_name=student.get("name") if isinstance(student, dict) else None,
+                status=p["status"],
+                band=e.get("overall_band") if e else None,
+                fluency=e.get("fluency") if e else None,
+                grammar=e.get("grammar") if e else None,
+                vocabulary=e.get("vocabulary") if e else None,
+                pronunciation=e.get("pronunciation") if e else None,
+            )
+        )
+
+    return RoomScoresOut(
+        room_id=room_id,
+        room_code=room["room_code"],
+        participants=scores,
     )
