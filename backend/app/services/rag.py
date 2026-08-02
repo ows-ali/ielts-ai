@@ -6,7 +6,8 @@ from app.core.config import settings
 from app.services.check import ensure_backend_ready
 from app.services.supabase_client import get_supabase_client
 
-EMBEDDING_MODEL = "text-embedding-004"
+EMBEDDING_MODEL = "gemini-embedding-2"
+EMBEDDING_DIMENSIONS = 768
 
 
 async def _embed(text: str) -> list[float]:
@@ -14,7 +15,11 @@ async def _embed(text: str) -> list[float]:
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"{EMBEDDING_MODEL}:embedContent?key={settings.gemini_api_key}"
     )
-    body = {"model": f"models/{EMBEDDING_MODEL}", "content": {"parts": [{"text": text}]}}
+    body = {
+        "model": f"models/{EMBEDDING_MODEL}",
+        "content": {"parts": [{"text": text}]},
+        "outputDimensionality": EMBEDDING_DIMENSIONS,
+    }
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(url, json=body)
         resp.raise_for_status()

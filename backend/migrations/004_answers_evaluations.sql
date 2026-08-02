@@ -51,3 +51,8 @@ create policy "evaluations read own" on public.evaluations
             where a.id = public.evaluations.answer_id and r.teacher_id = auth.uid()
         )
     );
+
+-- Added here (after questions table exists) so the FK resolves.
+alter table public.rooms
+    add column if not exists current_question_id uuid
+    references public.questions (id) on delete set null;

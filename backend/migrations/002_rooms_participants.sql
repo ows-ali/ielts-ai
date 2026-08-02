@@ -8,7 +8,6 @@ create table if not exists public.rooms (
     teacher_id uuid not null references public.users (id) on delete cascade,
     status text not null default 'waiting' check (status in ('waiting', 'live', 'ended')),
     current_student_id uuid references public.users (id) on delete set null,
-    current_question_id uuid references public.questions (id) on delete set null,
     created_at timestamptz not null default now()
 );
 

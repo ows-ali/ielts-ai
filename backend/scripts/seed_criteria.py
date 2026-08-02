@@ -17,7 +17,8 @@ from supabase import create_client
 
 load_dotenv()
 
-EMBEDDING_MODEL = "text-embedding-004"
+EMBEDDING_MODEL = "gemini-embedding-2"
+EMBEDDING_DIMENSIONS = 768
 
 CRITERIA: list[dict] = [
     # Fluency & Coherence
@@ -72,7 +73,11 @@ async def embed(client: httpx.AsyncClient, text: str) -> list[float]:
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"{EMBEDDING_MODEL}:embedContent?key={os.environ['GEMINI_API_KEY']}"
     )
-    body = {"model": f"models/{EMBEDDING_MODEL}", "content": {"parts": [{"text": text}]}}
+    body = {
+        "model": f"models/{EMBEDDING_MODEL}",
+        "content": {"parts": [{"text": text}]},
+        "outputDimensionality": EMBEDDING_DIMENSIONS,
+    }
     resp = await client.post(url, json=body)
     resp.raise_for_status()
     return resp.json()["embedding"]["values"]
@@ -82,6 +87,8 @@ async def main() -> None:
     supabase = create_client(
         os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"]
     )
+    supabase.table("ielts_criteria").delete().neq("id", 0).execute()
+    print("Cleared existing criteria rows.")
     async with httpx.AsyncClient(timeout=60) as client:
         for row in CRITERIA:
             query = (
