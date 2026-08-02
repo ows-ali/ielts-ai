@@ -66,22 +66,52 @@ export function TeacherRoomView({
   }
 
   useEffect(() => {
-    refresh();
+    let mounted = true;
+    async function doRefresh() {
+      try {
+        const [r, p, t] = await Promise.all([
+          api.getRoom(session, initialRoom.id),
+          api.participants(session, initialRoom.id),
+          api.turn(session, initialRoom.id),
+        ]);
+        if (!mounted) return;
+        setRoom(r);
+        setParticipants(p);
+        setTurn(t);
+        if (r.status === "ended") {
+          const rep = await api.classReport(session, initialRoom.id);
+          if (mounted) setReport(rep);
+        } else {
+          setReport(null);
+        }
+      } catch (err) {
+        if (mounted) await handleUnauthorized(err);
+      }
+    }
+
+    doRefresh();
+
     const supabase = createClient();
     const channel = supabase
       .channel(`room-${initialRoom.id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "rooms", filter: `id=eq.${initialRoom.id}` },
-        refresh
+        () => {
+          doRefresh();
+        }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "participants", filter: `room_id=eq.${initialRoom.id}` },
-        refresh
+        () => {
+          doRefresh();
+        }
       )
       .subscribe();
+
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -206,16 +236,65 @@ export function TeacherRoomView({
               <p className="text-2xl font-bold">
                 Average band: {report.average_band ?? "—"}
               </p>
-              <ul className="mt-4 space-y-2">
+              <ul className="mt-4 space-y-3">
                 {report.participants.map((p) => (
                   <li
                     key={p.student_id}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                    className="rounded-lg border border-slate-200 p-4 space-y-3"
                   >
-                    <span className="font-medium">{p.student_name ?? "Student"}</span>
-                    <span className="text-sm font-semibold">
-                      {p.band !== null ? `Band ${p.band}` : "—"}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-slate-900">{p.student_name ?? "Student"}</p>
+                      <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        {p.band !== null ? `Band ${p.band}` : "—"}
+                      </span>
+                    </div>
+
+                    {(p.fluency !== undefined || p.grammar !== undefined || p.vocabulary !== undefined || p.pronunciation !== undefined) && (
+                      <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div className="bg-slate-50 p-2 rounded">
+                          <p className="font-semibold text-slate-700">{p.fluency ?? "—"}</p>
+                          <p className="text-slate-400">Fluency</p>
+                        </div>
+                        <div className="bg-slate-50 p-2 rounded">
+                          <p className="font-semibold text-slate-700">{p.grammar ?? "—"}</p>
+                          <p className="text-slate-400">Grammar</p>
+                        </div>
+                        <div className="bg-slate-50 p-2 rounded">
+                          <p className="font-semibold text-slate-700">{p.vocabulary ?? "—"}</p>
+                          <p className="text-slate-400">Vocab</p>
+                        </div>
+                        <div className="bg-slate-50 p-2 rounded">
+                          <p className="font-semibold text-slate-700">{p.pronunciation ?? "—"}</p>
+                          <p className="text-slate-400">Pronun.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {p.question && (
+                      <p className="text-xs text-slate-600 font-medium">Prompt: {p.question}</p>
+                    )}
+
+                    {p.transcript && (
+                      <p className="text-xs italic text-slate-500 line-clamp-2">&ldquo;{p.transcript}&rdquo;</p>
+                    )}
+
+                    {p.audio_url && (
+                      <div className="pt-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Student Audio Recording:</p>
+                        <audio controls src={p.audio_url} className="w-full h-9" />
+                      </div>
+                    )}
+
+                    {p.feedback && p.feedback.length > 0 && (
+                      <div className="rounded bg-amber-50 p-3 text-xs text-amber-800">
+                        <p className="font-semibold mb-1">Individual Action Items:</p>
+                        <ul className="list-disc pl-4 space-y-0.5">
+                          {p.feedback.map((tip, idx) => (
+                            <li key={idx}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -194,7 +194,7 @@ async def list_evaluations_for_room(room_id: str) -> list[dict]:
     client = await _client()
     data = (
         await client.table("evaluations")
-        .select("*, answers!inner(room_id, student_id)")
+        .select("*, answers!inner(room_id, student_id, audio_url, transcript, question_id, questions(question))")
         .eq("answers.room_id", room_id)
         .execute()
     )

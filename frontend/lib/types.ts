@@ -80,6 +80,14 @@ export interface ParticipantScore {
   student_name: string | null;
   status: string;
   band: number | null;
+  audio_url?: string | null;
+  transcript?: string | null;
+  question?: string | null;
+  fluency?: number | null;
+  grammar?: number | null;
+  vocabulary?: number | null;
+  pronunciation?: number | null;
+  feedback?: string[] | null;
 }
 
 export interface ClassReport {

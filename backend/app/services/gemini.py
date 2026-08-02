@@ -113,12 +113,19 @@ async def summarize_class_problems(evaluations: list[dict]) -> list[str]:
 
 
 async def _generate_text(url: str, body: dict) -> str:
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(url, json=body)
-        if resp.status_code != 200:
-            raise ValueError(f"Gemini API error {resp.status_code}: {resp.text[:500]}")
-        data = resp.json()
-        try:
-            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-        except (KeyError, IndexError):
-            raise ValueError(f"Unexpected Gemini response: {data}")
+    import asyncio
+    max_retries = 3
+    for attempt in range(max_retries):
+        async with httpx.AsyncClient(timeout=60) as client:
+            resp = await client.post(url, json=body)
+            if resp.status_code == 429:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(12 * (attempt + 1))
+                    continue
+            if resp.status_code != 200:
+                raise ValueError(f"Gemini API error {resp.status_code}: {resp.text[:500]}")
+            data = resp.json()
+            try:
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            except (KeyError, IndexError):
+                raise ValueError(f"Unexpected Gemini response: {data}")

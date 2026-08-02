@@ -13,7 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
-import type { Evaluation, TurnState } from "@/lib/types";
+import type { ClassReport, Evaluation, TurnState } from "@/lib/types";
 
 const BAND_LABELS: Record<number, string> = {
   1: "Band 1",
@@ -39,6 +39,7 @@ export function StudentSpeakingSession({
   const router = useRouter();
   const [turn, setTurn] = useState<TurnState | null>(null);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [classReport, setClassReport] = useState<ClassReport | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const alreadyEvaluatedRef = useRef<string | null>(null);
@@ -55,20 +56,49 @@ export function StudentSpeakingSession({
   }, [session, roomId, handleUnauthorized]);
 
   useEffect(() => {
-    refresh();
+    let mounted = true;
+    async function doRefresh() {
+      try {
+        const t = await api.turn(session, roomId);
+        if (mounted) setTurn(t);
+      } catch (err) {
+        if (mounted) await handleUnauthorized(err);
+      }
+    }
+
+    doRefresh();
+
     const supabase = createClient();
     const channel = supabase
       .channel(`student-room-${roomId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "rooms", filter: `id=eq.${roomId}` },
-        refresh
+        () => {
+          doRefresh();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "participants", filter: `room_id=eq.${roomId}` },
+        () => {
+          doRefresh();
+        }
       )
       .subscribe();
+
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
     };
-  }, [refresh, roomId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  useEffect(() => {
+    if (turn?.status === "ended") {
+      api.classReport(session, roomId).then(setClassReport).catch(() => {});
+    }
+  }, [turn?.status, session, roomId]);
 
   const myTurn =
     turn?.status === "live" && turn.current_student_id === userId;
@@ -116,18 +146,46 @@ export function StudentSpeakingSession({
 
   if (turn.status === "ended") {
     return (
-      <main className="mx-auto max-w-lg p-6">
+      <main className="mx-auto max-w-lg p-6 space-y-6">
         <Card>
           <CardContent className="p-8 text-center">
             <h1 className="text-xl font-bold">Session ended</h1>
             <p className="mt-2 text-sm text-slate-500">
-              Thanks for practicing. View your feedback in your progress report.
+              Thanks for practicing! Check the class performance below or view your full report.
             </p>
             <Button className="mt-4" onClick={() => router.push("/student/report")}>
-              View my report
+              View my progress report
             </Button>
           </CardContent>
         </Card>
+
+        {classReport && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Class Results</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg font-bold text-slate-800">
+                Average band score: {classReport.average_band ?? "—"}
+              </p>
+              <ul className="mt-4 space-y-2">
+                {classReport.participants.map((p) => (
+                  <li
+                    key={p.student_id}
+                    className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                  >
+                    <span className="font-medium text-slate-800">
+                      {p.student_name ?? "Student"}
+                    </span>
+                    <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                      {p.band !== null ? `Band ${p.band}` : "—"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
       </main>
     );
   }

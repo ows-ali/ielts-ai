@@ -46,15 +46,18 @@ async def student_report(
 
 @router.get("/rooms/{room_id}/report", response_model=ClassReportOut)
 async def class_report(
-    room_id: str, user: CurrentUser = Depends(require_teacher)
+    room_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> ClassReportOut:
     room = await db.get_room(room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
-    if room["teacher_id"] != user.id:
-        raise HTTPException(status_code=403, detail="Not your room")
-
+    
     participants = await db.list_participants(room_id)
+    is_teacher = (room["teacher_id"] == user.id)
+    is_participant = any(p["student_id"] == user.id for p in participants)
+    if not is_teacher and not is_participant:
+        raise HTTPException(status_code=403, detail="Not authorized to view this room report")
+
     evals = await db.list_evaluations_for_room(room_id)
     eval_by_student: dict[str, dict] = {}
     for e in evals:
@@ -66,12 +69,26 @@ async def class_report(
     for p in participants:
         student = p.get("users") or {}
         e = eval_by_student.get(p["student_id"])
+        answer = (e.get("answers") or {}) if e else {}
+        q_obj = (answer.get("questions") or {}) if isinstance(answer, dict) else {}
+        
+        # Audio, transcript, sub-scores, and feedback are only visible to the teacher or the student themselves
+        show_private = is_teacher or (p["student_id"] == user.id)
+        
         scores.append(
             ParticipantScore(
                 student_id=p["student_id"],
                 student_name=student.get("name") if isinstance(student, dict) else None,
                 status=p["status"],
                 band=e.get("overall_band") if e else None,
+                audio_url=answer.get("audio_url") if (e and show_private) else None,
+                transcript=answer.get("transcript") if (e and show_private) else None,
+                question=q_obj.get("question") if (e and show_private) else None,
+                fluency=e.get("fluency") if (e and show_private) else None,
+                grammar=e.get("grammar") if (e and show_private) else None,
+                vocabulary=e.get("vocabulary") if (e and show_private) else None,
+                pronunciation=e.get("pronunciation") if (e and show_private) else None,
+                feedback=e.get("feedback") if (e and show_private) else None,
             )
         )
 

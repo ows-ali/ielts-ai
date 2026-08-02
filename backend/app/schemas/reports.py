@@ -24,9 +24,17 @@ class StudentReportOut(BaseModel):
 
 class ParticipantScore(BaseModel):
     student_id: str
-    student_name: str
+    student_name: str | None = None
     status: str
     band: float | None = None
+    audio_url: str | None = None
+    transcript: str | None = None
+    question: str | None = None
+    fluency: float | None = None
+    grammar: float | None = None
+    vocabulary: float | None = None
+    pronunciation: float | None = None
+    feedback: list[str] | None = None
 
 
 class ClassReportOut(BaseModel):

@@ -187,8 +187,11 @@ Authorization: Bearer <SUPABASE_ACCESS_TOKEN>
   ```
 
 #### `GET /api/rooms/{id}/report`
-- **Description**: Class-wide summary report for teachers, including participant scores and Gemini-generated common problem areas.
-- **Response `200 OK`**:
+- **Description**: Room-wide summary report accessible by teachers and room participants.
+- **Privacy Rules**:
+  - **Teachers**: Receive full participant score objects containing overall band, criterion sub-scores (fluency, grammar, vocabulary, pronunciation), question prompt, transcript, feedback tips, and `audio_url`.
+  - **Students**: Receive overall `band` scores for all classmates (class leaderboard), but `audio_url`, `transcript`, and `feedback` are strictly `null` for other students (populated ONLY for the student's own entry).
+- **Response `200 OK` (Teacher View Example)**:
   ```json
   {
     "room_id": "room-uuid",
@@ -198,7 +201,15 @@ Authorization: Bearer <SUPABASE_ACCESS_TOKEN>
         "student_id": "student-uuid",
         "student_name": "Student One",
         "status": "completed",
-        "band": 7.5
+        "band": 7.5,
+        "audio_url": "https://<supabase-url>/storage/v1/object/public/audio/room-uuid/student-uuid.webm",
+        "transcript": "In my spare time I enjoy reading books...",
+        "question": "What do you like to do in your spare time?",
+        "fluency": 7.5,
+        "grammar": 7.0,
+        "vocabulary": 8.0,
+        "pronunciation": 7.5,
+        "feedback": ["Use more complex conjunctions..."]
       }
     ],
     "average_band": 7.5,
