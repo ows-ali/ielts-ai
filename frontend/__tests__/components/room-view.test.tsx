@@ -213,7 +213,7 @@ describe("TeacherRoomView", () => {
     expect(mocks.supabase.removeChannel).toHaveBeenCalledWith(mocks.channel);
   });
 
-  it("does not poll with setInterval (realtime only)", async () => {
+  it("polls with setInterval as a realtime fallback", async () => {
     const setIntervalSpy = vi.spyOn(window, "setInterval");
     setUpRoom();
     render(<TeacherRoomView session={session} room={room} initialParticipants={participants} />);
@@ -222,7 +222,7 @@ describe("TeacherRoomView", () => {
     const pollTimers = setIntervalSpy.mock.calls
       .map(([, delay]) => delay as number)
       .filter((delay) => delay >= 1000);
-    expect(pollTimers).toHaveLength(0);
+    expect(pollTimers.length).toBeGreaterThanOrEqual(1);
     setIntervalSpy.mockRestore();
   });
 

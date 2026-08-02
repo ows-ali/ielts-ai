@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 
+import { Navbar } from "@/components/navbar";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,9 +104,16 @@ export function TeacherRoomView({
       if (room.status !== "ended") {
         doRefresh();
       }
-    }, 3000);
+    }, 2000);
 
     const supabase = createClient();
+    if (session?.access_token && typeof supabase.auth?.setSession === "function") {
+      supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token || "",
+      }).catch(() => {});
+    }
+
     const channel = supabase
       .channel(`room-${initialRoom.id}`)
       .on(
@@ -164,8 +172,11 @@ export function TeacherRoomView({
   const canStart = room.status === "waiting" && participants.length > 0;
 
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <div className="flex items-start justify-between">
+    <div className="min-h-screen bg-slate-50/50">
+      <Navbar userRole="teacher" />
+
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">{room.title}</h1>
           <p className="text-sm text-slate-500">
@@ -330,5 +341,6 @@ export function TeacherRoomView({
         )}
       </div>
     </main>
+  </div>
   );
 }

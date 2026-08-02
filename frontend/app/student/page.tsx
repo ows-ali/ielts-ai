@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { JoinRoomForm } from "@/components/student/join-room-form";
-import { SignOutButton } from "@/components/sign-out-button";
+import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
@@ -21,14 +21,25 @@ export default async function StudentPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Student Dashboard</h1>
-          <p className="text-sm text-slate-500">Welcome, {user.name}</p>
+    <div className="min-h-screen bg-slate-50/50">
+      <Navbar userRole="student" userName={user.name} />
+
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 p-6 text-white shadow-xl shadow-indigo-950/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300 border border-indigo-500/30">
+                STUDENT DASHBOARD
+              </span>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+                Welcome back, {user.name} 👋
+              </h1>
+              <p className="mt-1 text-sm text-indigo-200/80">
+                Join your teacher's practice session or review your speaking feedback history below.
+              </p>
+            </div>
+          </div>
         </div>
-        <SignOutButton />
-      </div>
 
       <div className="mt-6 grid gap-6">
         <Card>
@@ -81,6 +92,7 @@ export default async function StudentPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

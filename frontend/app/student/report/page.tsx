@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SignOutButton } from "@/components/sign-out-button";
+import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
@@ -32,19 +32,19 @@ export default async function StudentReportPage() {
   const latest = report.attempts[0];
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My progress</h1>
-          <p className="text-sm text-slate-500">{user.name}</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-slate-50/50">
+      <Navbar userRole="student" userName={user.name} />
+
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight sm:text-3xl">My Progress & Feedback</h1>
+            <p className="text-sm text-slate-500">Comprehensive evaluation analysis for {user.name}</p>
+          </div>
           <Link href="/student">
-            <Button variant="secondary">Back</Button>
+            <Button variant="secondary" className="shadow-sm">← Back to Dashboard</Button>
           </Link>
-          <SignOutButton />
         </div>
-      </div>
 
       {latest && (
         <Card className="mt-6 border-emerald-200">
@@ -133,6 +133,7 @@ export default async function StudentReportPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+      </main>
+    </div>
   );
 }

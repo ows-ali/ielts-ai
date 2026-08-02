@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 
 import { AudioRecorder } from "@/components/student/audio-recorder";
+import { Navbar } from "@/components/navbar";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,18 @@ export function StudentSpeakingSession({
 
     doRefresh();
 
+    const interval = setInterval(() => {
+      doRefresh();
+    }, 2000);
+
     const supabase = createClient();
+    if (session?.access_token && typeof supabase.auth?.setSession === "function") {
+      supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token || "",
+      }).catch(() => {});
+    }
+
     const channel = supabase
       .channel(`student-room-${roomId}`)
       .on(
@@ -89,6 +101,7 @@ export function StudentSpeakingSession({
 
     return () => {
       mounted = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,56 +165,61 @@ export function StudentSpeakingSession({
 
   if (turn.status === "ended") {
     return (
-      <main className="mx-auto max-w-lg p-6 space-y-6">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <h1 className="text-xl font-bold">Session ended</h1>
-            <p className="mt-2 text-sm text-slate-500">
-              Thanks for practicing! Check the class performance below or view your full report.
-            </p>
-            <Button className="mt-4" onClick={() => router.push("/student/report")}>
-              View my progress report
-            </Button>
-          </CardContent>
-        </Card>
-
-        {classReport && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Class Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-bold text-slate-800">
-                Average band score: {classReport.average_band ?? "—"}
+      <div className="min-h-screen bg-slate-50/50">
+        <Navbar userRole="student" />
+        <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
+          <Card className="shadow-sm">
+            <CardContent className="p-8 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-3">
+                <span className="font-bold text-lg">✓</span>
+              </div>
+              <h1 className="text-xl font-bold text-slate-900">Session ended</h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Thanks for practicing! Check the class performance below or view your full report.
               </p>
-              <ul className="mt-4 space-y-2">
-                {classReport.participants.map((p) => (
-                  <li
-                    key={p.student_id}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
-                  >
-                    <span className="font-medium text-slate-800">
-                      {p.student_name ?? "Student"}
-                    </span>
-                    <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                      {p.band !== null ? `Band ${p.band}` : "—"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <Button className="mt-4 shadow-sm" onClick={() => router.push("/student/report")}>
+                View my progress report
+              </Button>
             </CardContent>
           </Card>
-        )}
-      </main>
+
+          {classReport && (
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle>Class Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg font-bold text-slate-800">
+                  Average band score: {classReport.average_band ?? "—"}
+                </p>
+                <ul className="mt-4 space-y-2">
+                  {classReport.participants.map((p) => (
+                    <li
+                      key={p.student_id}
+                      className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                    >
+                      <span className="font-medium text-slate-800">
+                        {p.student_name ?? "Student"}
+                      </span>
+                      <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        {p.band !== null ? `Band ${p.band}` : "—"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Speaking practice</h1>
-        <SignOutButton />
-      </div>
+    <div className="min-h-screen bg-slate-50/50">
+      <Navbar userRole="student" />
+
+      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
 
       {!myTurn && !evaluation && (
         <Card className="mt-6">
@@ -299,5 +317,6 @@ export function StudentSpeakingSession({
 
       {error && <p className="mt-4 text-sm text-rose-600">{error}</p>}
     </main>
+  </div>
   );
 }
