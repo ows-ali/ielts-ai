@@ -31,10 +31,12 @@ export function TeacherRoomView({
   session,
   room: initialRoom,
   initialParticipants,
+  userName,
 }: {
   session: Session;
   room: Room;
   initialParticipants: Participant[];
+  userName?: string | null;
 }) {
   const [room, setRoom] = useState(initialRoom);
   const [participants, setParticipants] = useState(initialParticipants);
@@ -167,7 +169,7 @@ export function TeacherRoomView({
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Navbar userRole="teacher" />
+      <Navbar userRole="teacher" userName={userName} />
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="flex items-start justify-between">

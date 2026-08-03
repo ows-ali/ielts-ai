@@ -118,4 +118,22 @@ describe("AudioRecorder", () => {
     expect(await screen.findByText("Microphone access was denied.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start recording" })).toBeInTheDocument();
   });
+
+  it("does not stop recording when parent re-renders with new callbacks", async () => {
+    const user = userEvent.setup();
+    let parentState = 0;
+    const { rerender } = render(
+      <AudioRecorder onRecorded={vi.fn()} onStateChange={() => parentState++} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Start recording" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Stop recording" })).toBeInTheDocument());
+
+    // Re-render parent with a new inline onStateChange function instance (simulating 2s polling)
+    rerender(<AudioRecorder onRecorded={vi.fn()} onStateChange={() => parentState++} />);
+
+    // Must REMAIN recording and NOT be auto-stopped by cleanup
+    expect(screen.getByRole("button", { name: "Stop recording" })).toBeInTheDocument();
+    expect(screen.getByText(/Recording\.\.\./)).toBeInTheDocument();
+  });
 });

@@ -13,13 +13,20 @@ export default async function StudentRoomPage({
 }) {
   const { roomId } = await params;
   const { user, session } = await requireStudent();
+  let room;
   try {
-    await api.getRoom(session, roomId);
+    room = await api.getRoom(session, roomId);
   } catch {
     notFound();
   }
 
   return (
-    <StudentSpeakingSession session={session} roomId={roomId} userId={user.id} />
+    <StudentSpeakingSession
+      session={session}
+      roomId={roomId}
+      initialRoom={room}
+      userId={user.id}
+      userName={user.name}
+    />
   );
 }

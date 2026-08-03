@@ -24,5 +24,5 @@ export default async function TeacherRoomPage({
   }
   const participants = await api.participants(session, roomId);
 
-  return <TeacherRoomView session={session} room={room} initialParticipants={participants} />;
+  return <TeacherRoomView session={session} room={room} initialParticipants={participants} userName={user.name} />;
 }

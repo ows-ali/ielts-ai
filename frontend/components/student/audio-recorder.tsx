@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function pickMimeType(): string | undefined {
   const candidates = [
@@ -33,39 +33,73 @@ export function AudioRecorder({
   const [time, setTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pendingBlob, setPendingBlob] = useState<{ blob: Blob; mime: string } | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [retriesLeft, setRetriesLeft] = useState(maxRetries);
   const [submitting, setSubmitting] = useState(false);
+
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const blobUrl = useMemo(() => 
-    pendingBlob ? URL.createObjectURL(pendingBlob.blob) : null, 
-    [pendingBlob]
-  );
-
+  const onStateChangeRef = useRef(onStateChange);
   useEffect(() => {
-    return () => {
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
-    };
-  }, [blobUrl]);
+    onStateChangeRef.current = onStateChange;
+  }, [onStateChange]);
+
+  const onRecordedRef = useRef(onRecorded);
+  useEffect(() => {
+    onRecordedRef.current = onRecorded;
+  }, [onRecorded]);
+
+  // Manage Blob URL lifecycle safely
+  useEffect(() => {
+    if (pendingBlob) {
+      const url = URL.createObjectURL(pendingBlob.blob);
+      setBlobUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setBlobUrl(null);
+    }
+  }, [pendingBlob]);
 
   const stopInternal = useCallback(() => {
     if (autoStopRef.current) {
       clearTimeout(autoStopRef.current);
       autoStopRef.current = null;
     }
-    mediaRef.current?.stop();
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (mediaRef.current && mediaRef.current.state !== "inactive") {
+      try {
+        mediaRef.current.stop();
+      } catch {
+        /* ignore */
+      }
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setRecording(false);
     setTime(0);
-    onStateChange?.(false);
-  }, [onStateChange]);
+    onStateChangeRef.current?.(false);
+  }, []);
 
+  // Cleanup ON UNMOUNT ONLY
   useEffect(() => {
-    return () => stopInternal();
-  }, [stopInternal]);
+    return () => {
+      if (autoStopRef.current) clearTimeout(autoStopRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (mediaRef.current && mediaRef.current.state !== "inactive") {
+        try {
+          mediaRef.current.stop();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+  }, []);
 
   async function start() {
     setError(null);
@@ -76,7 +110,7 @@ export function AudioRecorder({
       const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
       chunksRef.current = [];
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
@@ -85,20 +119,24 @@ export function AudioRecorder({
         });
         setRecording(false);
         setTime(0);
-        if (intervalRef.current) clearInterval(intervalRef.current);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         if (autoStopRef.current) {
           clearTimeout(autoStopRef.current);
           autoStopRef.current = null;
         }
-        onStateChange?.(false);
+        onStateChangeRef.current?.(false);
         if (blob.size > 0) {
           setPendingBlob({ blob, mime: recorder.mimeType || "audio/webm" });
         }
       };
-      recorder.start();
+      // Record in 500ms slices so chunks are continuously generated
+      recorder.start(500);
       mediaRef.current = recorder;
       setRecording(true);
-      onStateChange?.(true);
+      onStateChangeRef.current?.(true);
       setTime(0);
       intervalRef.current = setInterval(() => setTime((t) => t + 1), 1000);
 
@@ -127,7 +165,7 @@ export function AudioRecorder({
     if (!pendingBlob) return;
     setSubmitting(true);
     try {
-      await onRecorded(pendingBlob.blob, pendingBlob.mime);
+      await onRecordedRef.current(pendingBlob.blob, pendingBlob.mime);
     } finally {
       setSubmitting(false);
     }

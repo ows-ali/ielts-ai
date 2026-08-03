@@ -25,7 +25,7 @@ async def student_report(
         answer = r.get("answers") or {}
         room = answer.get("rooms") or {}
         question = answer.get("questions") or {}
-    attempts.append(
+        attempts.append(
             StudentAttempt(
                 id=r["id"],
                 room_id=answer.get("room_id"),
@@ -120,14 +120,17 @@ async def room_scores(
 ) -> RoomScoresOut:
     room = await db.get_room(room_id)
     if not room:
+        room = await db.get_room_by_code(room_id.strip().upper())
+    if not room:
         raise HTTPException(status_code=404, detail="Room not found")
-    
-    participants = await db.list_participants(room_id)
+
+    actual_room_id = room["id"]
+    participants = await db.list_participants(actual_room_id)
     is_participant = any(p["student_id"] == user.id for p in participants)
     if not is_participant:
         raise HTTPException(status_code=403, detail="Not authorized to view this room scores")
-    
-    evals = await db.list_evaluations_for_room(room_id)
+
+    evals = await db.list_evaluations_for_room(actual_room_id)
     eval_by_student: dict[str, dict] = {}
     for e in evals:
         student_id = e.get("student_id") or (e.get("answers") or {}).get("student_id")

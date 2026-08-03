@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 
+import { ClassScoresCollapsible } from "@/components/student/class-scores-collapsible";
 import { AudioRecorder } from "@/components/student/audio-recorder";
 import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { useUnauthorizedRedirect } from "@/lib/use-unauthorized";
-import type { ClassReport, Evaluation, TurnState } from "@/lib/types";
+import type { ClassReport, Evaluation, Room, TurnState } from "@/lib/types";
 
 const BAND_LABELS: Record<number, string> = {
   1: "Band 1",
@@ -30,13 +31,18 @@ const BAND_LABELS: Record<number, string> = {
 export function StudentSpeakingSession({
   session,
   roomId,
+  initialRoom,
   userId,
+  userName,
 }: {
   session: Session;
   roomId: string;
+  initialRoom?: Room;
   userId: string;
+  userName?: string | null;
 }) {
   const router = useRouter();
+  const [room, setRoom] = useState<Room | null>(initialRoom || null);
   const [turn, setTurn] = useState<TurnState | null>(null);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [classReport, setClassReport] = useState<ClassReport | null>(null);
@@ -48,8 +54,12 @@ export function StudentSpeakingSession({
 
   const refresh = useCallback(async () => {
     try {
-      const t = await api.turn(session, roomId);
+      const [t, r] = await Promise.all([
+        api.turn(session, roomId),
+        api.getRoom(session, roomId).catch(() => null),
+      ]);
       setTurn(t);
+      if (r) setRoom(r);
     } catch (err) {
       await handleUnauthorized(err);
     }
@@ -59,8 +69,14 @@ export function StudentSpeakingSession({
     let mounted = true;
     async function doRefresh() {
       try {
-        const t = await api.turn(session, roomId);
-        if (mounted) setTurn(t);
+        const [t, r] = await Promise.all([
+          api.turn(session, roomId),
+          api.getRoom(session, roomId).catch(() => null),
+        ]);
+        if (mounted) {
+          setTurn(t);
+          if (r) setRoom(r);
+        }
       } catch (err) {
         if (mounted) await handleUnauthorized(err);
       }
@@ -162,7 +178,7 @@ export function StudentSpeakingSession({
   if (turn.status === "ended") {
     return (
       <div className="min-h-screen bg-slate-50/50">
-        <Navbar userRole="student" />
+        <Navbar userRole="student" userName={userName} />
         <main className="mx-auto max-w-xl px-4 py-8 space-y-6">
           <Card className="shadow-sm">
             <CardContent className="p-8 text-center">
@@ -213,20 +229,64 @@ export function StudentSpeakingSession({
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Navbar userRole="student" />
+      <Navbar userRole="student" userName={userName} />
 
       <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+        {/* Room Header Banner */}
+        <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 p-6 text-white shadow-xl shadow-indigo-950/10">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-indigo-500/20 px-3 py-0.5 text-xs font-semibold text-indigo-300 border border-indigo-500/30">
+                  PART {room?.part || turn.question?.part || 1} PRACTICE
+                </span>
+                {turn.status === "live" ? (
+                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300 border border-emerald-500/30 animate-pulse">
+                    ● LIVE
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[11px] font-bold text-amber-300 border border-amber-500/30">
+                    WAITING
+                  </span>
+                )}
+              </div>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                {room?.title || "IELTS Speaking Room"}
+              </h1>
+            </div>
+            {room?.room_code && (
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3.5 py-2 backdrop-blur-md border border-white/10">
+                <span className="text-xs text-indigo-200 uppercase font-semibold">Code:</span>
+                <span className="font-mono text-lg font-extrabold tracking-widest text-emerald-400">
+                  {room.room_code}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
 
-      {turn.status !== "live" && (
-        <Card className="mt-6">
-          <CardContent className="p-8 text-center">
-            <Spinner className="mx-auto h-6 w-6 text-emerald-600" />
-            <p className="mt-4 text-slate-600">
-              Waiting for the teacher to start the session...
-            </p>
-          </CardContent>
-        </Card>
-      )}
+        {turn.status !== "live" && (
+          <Card className="mt-6 border-amber-200 bg-amber-50/40 shadow-sm">
+            <CardContent className="p-8 text-center space-y-4">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-inner">
+                <Spinner className="h-7 w-7 text-amber-700" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  Connected to {room?.title || "Practice Room"}
+                </h2>
+                {room?.room_code && (
+                  <p className="mt-1 text-xs text-slate-500 font-mono">
+                    Room Code: <span className="font-bold text-slate-700">{room.room_code}</span>
+                  </p>
+                )}
+              </div>
+              <p className="max-w-md mx-auto text-sm text-slate-600">
+                You are checked in! Stay on this page — your speaking question will appear automatically as soon as your teacher starts the live session.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
       {turn.status === "live" && !evaluation && (
         <Card className="mt-6 border-emerald-200">
@@ -301,8 +361,9 @@ export function StudentSpeakingSession({
               </ul>
             </div>
             <p className="mt-4 text-sm text-slate-500">
-              Your answer has been submitted. The teacher may continue the session.
+              Your answer has been submitted.
             </p>
+            <ClassScoresCollapsible roomId={roomId} session={session} currentStudentId={userId} />
           </CardContent>
         </Card>
       )}

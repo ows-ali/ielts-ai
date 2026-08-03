@@ -1,8 +1,10 @@
 import Link from "next/link";
 
+import { ClassScoresCollapsible } from "@/components/student/class-scores-collapsible";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LazyAudio } from "@/components/ui/lazy-audio";
 import { api } from "@/lib/api";
 import { requireStudent } from "@/lib/auth";
 
@@ -80,7 +82,7 @@ export default async function StudentReportPage() {
             {latest.audio_url && (
               <div className="mt-4">
                 <p className="mb-1 text-xs font-medium text-slate-500">Recorded Audio:</p>
-                <audio controls src={latest.audio_url} className="w-full h-10" />
+                <LazyAudio src={latest.audio_url} />
               </div>
             )}
             {latest.feedback && latest.feedback.length > 0 && (
@@ -92,6 +94,10 @@ export default async function StudentReportPage() {
                   ))}
                 </ul>
               </div>
+            )}
+
+            {(latest.room_id || latest.room_code) && (
+              <ClassScoresCollapsible roomId={latest.room_id || latest.room_code!} session={session} currentStudentId={user.id} />
             )}
           </CardContent>
         </Card>
@@ -111,11 +117,11 @@ export default async function StudentReportPage() {
               {report.attempts.map((a) => (
                 <li
                   key={a.id}
-                  className="rounded-lg border border-slate-200 p-4"
+                  className="rounded-lg border border-slate-200 p-4 space-y-2"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-medium">{a.question}</p>
-                    <span className="text-sm font-semibold text-emerald-700">
+                    <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                       {a.overall_band !== null ? `Band ${a.overall_band}` : "—"}
                     </span>
                   </div>
@@ -125,14 +131,19 @@ export default async function StudentReportPage() {
                     </p>
                   )}
                   {a.audio_url && (
-                    <div className="mt-3">
-                      <audio controls src={a.audio_url} className="w-full h-9" />
+                    <div className="mt-2">
+                      <LazyAudio src={a.audio_url} />
                     </div>
                   )}
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="text-xs text-slate-400">
                     {a.title ? `${a.title} · ` : ""}
+                    {a.room_code ? `Code: ${a.room_code} · ` : ""}
                     {a.created_at ? new Date(a.created_at).toLocaleString() : ""}
                   </p>
+
+                  {(a.room_id || a.room_code) && (
+                    <ClassScoresCollapsible roomId={a.room_id || a.room_code!} session={session} currentStudentId={user.id} />
+                  )}
                 </li>
               ))}
             </ul>
