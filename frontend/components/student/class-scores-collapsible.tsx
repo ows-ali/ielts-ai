@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,26 +19,34 @@ export function ClassScoresCollapsible({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
   const [scores, setScores] = useState<RoomScoresOut | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open && !scores && !loading) {
-      setLoading(true);
-      setError(null);
-      api
-        .roomScores(session, roomId)
-        .then((data) => {
-          setScores(data);
-        })
-        .catch((err) => {
-          setError(err instanceof Error ? err.message : "Failed to load class scores");
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+  const fetchScores = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.roomScores(session, roomId);
+      setScores(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load class scores");
+    } finally {
+      setLoading(false);
+      setFetched(true);
     }
-  }, [open, scores, loading, session, roomId]);
+  }, [session, roomId]);
+
+  useEffect(() => {
+    if (open && !fetched && !loading) {
+      fetchScores();
+    }
+  }, [open, fetched, loading, fetchScores]);
+
+  const handleRetry = () => {
+    setFetched(false);
+    setScores(null);
+  };
 
   return (
     <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/30 overflow-hidden">
@@ -58,12 +66,23 @@ export function ClassScoresCollapsible({
       {open && (
         <div className="border-t border-indigo-100/80 p-4 space-y-3 bg-white/70">
           {loading && (
-            <div className="flex items-center justify-center py-4 gap-2 text-xs text-slate-500">
+            <div className="flex items-center justify-center py-3 gap-2 text-xs text-slate-500">
               <Spinner className="h-4 w-4 text-indigo-600" /> Loading class scores...
             </div>
           )}
 
-          {error && <p className="text-xs text-rose-600 font-medium py-1">{error}</p>}
+          {error && (
+            <div className="flex items-center justify-between py-1 text-xs text-rose-600 font-medium">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="underline text-indigo-600 hover:text-indigo-800 ml-2 font-bold"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           {scores && scores.participants.length > 0 && (
             <div className="space-y-2.5">

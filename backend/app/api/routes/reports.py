@@ -126,11 +126,16 @@ async def room_scores(
 
     actual_room_id = room["id"]
     participants = await db.list_participants(actual_room_id)
-    is_participant = any(p["student_id"] == user.id for p in participants)
-    if not is_participant:
-        raise HTTPException(status_code=403, detail="Not authorized to view this room scores")
-
     evals = await db.list_evaluations_for_room(actual_room_id)
+
+    is_teacher = (room.get("teacher_id") == user.id)
+    is_participant = any(p["student_id"] == user.id for p in participants)
+    has_evaluation = any(
+        (e.get("student_id") == user.id or (e.get("answers") or {}).get("student_id") == user.id)
+        for e in evals
+    )
+    if not is_teacher and not is_participant and not has_evaluation:
+        raise HTTPException(status_code=403, detail="Not authorized to view this room scores")
     eval_by_student: dict[str, dict] = {}
     for e in evals:
         student_id = e.get("student_id") or (e.get("answers") or {}).get("student_id")

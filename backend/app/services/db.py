@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 
 from app.core.security import CurrentUser
@@ -53,12 +54,32 @@ async def get_room_by_code(room_code: str) -> dict | None:
     return data.data if data else None
 
 
+def _is_uuid(val: str) -> bool:
+    try:
+        uuid.UUID(str(val))
+        return True
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
 async def get_room(room_id: str) -> dict | None:
+    if not room_id:
+        return None
     client = await _client()
-    data = (
-        await client.table("rooms").select("*").eq("id", room_id).maybe_single().execute()
-    )
-    return data.data if data else None
+    try:
+        if _is_uuid(room_id):
+            data = (
+                await client.table("rooms").select("*").eq("id", room_id).maybe_single().execute()
+            )
+            if data and data.data:
+                return data.data
+        # Fallback to room_code lookup if not UUID or not found by UUID
+        data = (
+            await client.table("rooms").select("*").eq("room_code", room_id.strip().upper()).maybe_single().execute()
+        )
+        return data.data if data else None
+    except Exception:
+        return None
 
 
 async def update_room(room_id: str, payload: dict) -> dict:
@@ -160,13 +181,20 @@ async def get_question(question_id: str) -> dict | None:
 
 
 async def get_next_question(part: int, exclude_ids: list[str]) -> dict | None:
+    import random
     client = await _client()
     query = client.table("questions").select("*").eq("part", part)
     if exclude_ids:
         query = query.not_.in_("id", exclude_ids)
-    data = await query.limit(1).execute()
+    data = await query.execute()
     rows = data.data or []
-    return rows[0] if rows else None
+    if not rows and exclude_ids:
+        # Fallback if all questions were excluded
+        data = await client.table("questions").select("*").eq("part", part).execute()
+        rows = data.data or []
+    if not rows:
+        return None
+    return random.choice(rows)
 
 
 async def get_student_history(student_id: str, limit: int = 5) -> list[dict]:
