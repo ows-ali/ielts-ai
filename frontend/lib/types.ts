@@ -104,3 +104,71 @@ export interface RoomScoresOut {
   room_code: string;
   participants: ParticipantScore[];
 }
+
+export type WritingQuestionType =
+  | "line"
+  | "bar"
+  | "pie"
+  | "table"
+  | "map"
+  | "process"
+  | "multi";
+
+export interface WritingQuestion {
+  id: string;
+  type: WritingQuestionType;
+  title: string;
+  prompt: string;
+  data_description?: Record<string, unknown> | null;
+  image_url?: string | null;
+  difficulty?: string | null;
+}
+
+export interface WritingSample {
+  id: string;
+  band: number;
+  answer_text: string;
+  task_achievement: number;
+  coherence_cohesion: number;
+  lexical_resource: number;
+  grammatical_range: number;
+  explanation: string;
+  improvement_tips: string[];
+}
+
+export interface WritingQuestionDetail extends WritingQuestion {
+  samples: WritingSample[];
+}
+
+export interface WritingFeedback {
+  id: string;
+  submission_id: string;
+  teacher_id: string;
+  teacher_name?: string | null;
+  task_achievement: number;
+  coherence_cohesion: number;
+  lexical_resource: number;
+  grammatical_range: number;
+  overall_band: number;
+  overall_comment?: string | null;
+  created_at?: string | null;
+}
+
+export interface WritingSubmission {
+  id: string;
+  question_id: string;
+  question_title?: string | null;
+  question_type?: string | null;
+  answer_text: string;
+  word_count?: number | null;
+  created_at?: string | null;
+  feedback: WritingFeedback[];
+  overall_band?: number | null;
+}
+
+export interface WritingSubmissionDetail extends WritingSubmission {
+  question_prompt?: string | null;
+  question_data?: Record<string, unknown> | null;
+  question_image_url?: string | null;
+  question_difficulty?: string | null;
+}

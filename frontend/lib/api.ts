@@ -10,6 +10,12 @@ import type {
   StudentReport,
   TurnState,
   User,
+  WritingFeedback,
+  WritingQuestion,
+  WritingQuestionDetail,
+  WritingSample,
+  WritingSubmission,
+  WritingSubmissionDetail,
 } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -112,4 +118,51 @@ export const api = {
 
   roomScores: (s: Session | null, roomId: string) =>
     request<RoomScoresOut>(`/api/rooms/${roomId}/scores`, s),
+
+  writingQuestions: (s: Session | null, params?: { type?: string; difficulty?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.type) qs.set("type", params.type);
+    if (params?.difficulty) qs.set("difficulty", params.difficulty);
+    const q = qs.toString();
+    return request<WritingQuestion[]>(`/api/writing/questions${q ? `?${q}` : ""}`, s);
+  },
+
+  writingQuestion: (s: Session | null, id: string) =>
+    request<WritingQuestionDetail>(`/api/writing/questions/${id}`, s),
+
+  writingSamples: (s: Session | null, id: string) =>
+    request<WritingSample[]>(`/api/writing/questions/${id}/samples`, s).catch(
+      () => []
+    ),
+
+  submitWriting: (s: Session | null, questionId: string, answerText: string) =>
+    request<WritingSubmission>("/api/writing/submissions", s, {
+      method: "POST",
+      body: JSON.stringify({ question_id: questionId, answer_text: answerText }),
+    }),
+
+  myWritingSubmissions: (s: Session | null) =>
+    request<WritingSubmission[]>("/api/writing/submissions/me", s),
+
+  allWritingSubmissions: (s: Session | null) =>
+    request<WritingSubmission[]>("/api/writing/submissions", s),
+
+  writingSubmission: (s: Session | null, id: string) =>
+    request<WritingSubmissionDetail>(`/api/writing/submissions/${id}`, s),
+
+  giveWritingFeedback: (
+    s: Session | null,
+    submissionId: string,
+    scores: {
+      task_achievement: number;
+      coherence_cohesion: number;
+      lexical_resource: number;
+      grammatical_range: number;
+      overall_comment?: string | null;
+    }
+  ) =>
+    request<WritingFeedback>("/api/writing/feedback", s, {
+      method: "POST",
+      body: JSON.stringify({ submission_id: submissionId, ...scores }),
+    }),
 };
