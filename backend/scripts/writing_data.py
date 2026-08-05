@@ -522,52 +522,51 @@ QUESTIONS: list[dict] = [
     },
     {
         "type": "process",
-        "title": "Recycling Plastic Bottles",
+        "title": "Glass Recycling",
         "difficulty": "medium",
         "prompt": (
-            "The diagram below shows the recycling process of plastic bottles.\n\n"
+            "The diagram below shows the recycling process of glass bottles.\n\n"
             "Summarise the information by selecting and reporting the main features, "
             "and make comparisons where relevant.\n\n"
             "Write at least 150 words."
         ),
-        "image_url": "writing-images/plastic-recycling.png",
+        "image_url": "writing-images/glass-recycling.png",
         "data_description": {
             "type": "process",
-            "title": "Plastic bottle recycling",
+            "title": "Glass bottle recycling",
             "steps": [
-                "People place plastic bottles in recycling bins.",
-                "Bottles are collected and transported to a sorting facility.",
-                "Bottles are separated by type and colour.",
-                "Bottles are washed and shredded into small flakes.",
-                "The flakes are melted and formed into pellets.",
-                "Pellets are used to make new plastic products.",
+                "Used glass bottles are placed in recycling collection bins.",
+                "Bottles are collected and transported to a recycling plant.",
+                "Glass is washed to remove impurities and sorted by colour.",
+                "Sorted glass is crushed into small fragments called cullet.",
+                "Cullet is melted in a high-temperature furnace.",
+                "Liquid glass is moulded into new bottles and jars.",
+                "New glass products are distributed to shops for consumer use.",
             ],
         },
     },
     {
         "type": "process",
-        "title": "Chocolate Production",
+        "title": "Hydroelectric Power Generation",
         "difficulty": "hard",
         "prompt": (
-            "The diagram below shows the process by which chocolate is produced from "
-            "cocoa beans.\n\n"
+            "The diagram below shows how electricity is generated in a hydroelectric power station.\n\n"
             "Summarise the information by selecting and reporting the main features, "
             "and make comparisons where relevant.\n\n"
             "Write at least 150 words."
         ),
-        "image_url": "writing-images/chocolate-production.png",
+        "image_url": "writing-images/hydroelectric-power.png",
         "data_description": {
             "type": "process",
-            "title": "Chocolate production",
+            "title": "Hydroelectric power generation",
             "steps": [
-                "Cocoa pods are harvested from cocoa trees.",
-                "Pods are opened and the beans are removed.",
-                "Beans are fermented for several days.",
-                "Beans are dried in the sun.",
-                "Dried beans are roasted.",
-                "Roasted beans are ground to produce cocoa liquor.",
-                "Cocoa liquor is mixed with sugar and milk and pressed.",
-                "The mixture is moulded and cooled into chocolate bars.",
+                "Water is collected and stored in a high-level reservoir behind a dam.",
+                "Water flows down through an intake gate into a penstock pipe.",
+                "The force of the flowing water spins a turbine at high speed.",
+                "The spinning turbine drives a generator to produce electricity.",
+                "A transformer converts the electrical voltage for long-distance transport.",
+                "Power lines distribute electricity across the national grid.",
+                "Water exits the turbine and discharges back into the river downstream.",
             ],
         },
     },
@@ -2870,214 +2869,206 @@ SAMPLES: dict[int, dict[str, dict]] = {
             ],
         },
     },
-    # ---------------- Q20: Plastic Bottle Recycling ----------------
+    # ---------------- Q20: Glass Recycling ----------------
     20: {
         "5": {
             "band": 5,
             "answer_text": (
-                "The diagram shows the recycling process of plastic bottles.\n"
-                "First, people put their plastic bottles in recycling bins. Then the bottles are "
-                "collected and taken to a sorting facility. At the facility, the bottles are "
-                "separated by type and colour. After that, the bottles are washed and shredded "
-                "into small flakes. Then the flakes are melted and formed into pellets. "
-                "Finally, the pellets are used to make new plastic products.\n"
-                "Overall, this is a circular process. The old bottles become new products, and "
-                "when people use those products and throw them away, the recycling can start "
-                "again. This process helps to reduce plastic waste."
+                "The diagram shows the recycling process of glass bottles.\n"
+                "First, used glass bottles are placed in recycling collection bins by people. "
+                "Then the bottles are collected and taken to a recycling plant. At the plant, "
+                "the glass is washed to remove dirt and sorted by colour into clear, green, and "
+                "brown glass. After that, the sorted glass is crushed into small pieces called "
+                "cullet. Then the cullet is melted in a high-temperature furnace. Next, the "
+                "liquid glass is moulded into new bottles and jars. Finally, the new glass "
+                "products are delivered to shops for people to use again.\n"
+                "Overall, this is a circular recycling process. Old glass bottles are collected, "
+                "crushed, melted and made into new products, so the cycle can repeat."
             ),
             "task_achievement": 5,
             "coherence_cohesion": 5,
             "lexical_resource": 5,
             "grammatical_range": 5,
             "explanation": (
-                "The steps are in the correct order with accurate basic information, but the "
-                "language is simple and repetitive. Sequencing is functional but vocabulary is "
-                "limited."
+                "The steps are described in chronological order with accurate basic details. "
+                "However, sentence structures are simple and repetitive, with limited process-specific vocabulary."
             ),
             "improvement_tips": [
-                "Add an overview at the start summarising the circular nature of the process.",
-                "Use more precise verbs: 'sorted', 'processed', 'compressed'.",
-                "Vary the sequencing expressions.",
-                "Use passive constructions more consistently.",
-                "Expand the final stage by noting the products can be recycled again.",
+                "Include a formal overview in a separate paragraph.",
+                "Use passive structures more consistently (e.g. 'is crushed', 'is melted').",
+                "Vary sequencing transitions beyond 'First', 'Then', 'After that'.",
+                "Use technical terms like 'cullet' and 'furnace' with explanations.",
+                "Group the initial collection stages and manufacturing stages.",
             ],
         },
         "7": {
             "band": 7,
             "answer_text": (
-                "The diagram illustrates the recycling process for plastic bottles, which operates "
-                "as a continuous loop.\n"
-                "Overall, the process consists of six main stages, beginning with collection and "
-                "ending with the manufacture of new products, after which the cycle can begin "
-                "again.\n"
-                "In the first stage, consumers place plastic bottles in recycling bins, from "
-                "which they are collected and transported to a sorting facility. Here, the "
-                "bottles are separated according to type and colour, a crucial step for ensuring "
-                "the quality of the recycled material. The sorted bottles are then washed and "
-                "shredded into small flakes. These flakes are subsequently melted and formed into "
-                "pellets, which serve as the raw material for producing new plastic products.\n"
-                "In conclusion, the diagram shows how plastic bottles are recovered and "
-                "transformed into reusable material, thereby reducing waste."
+                "The diagram illustrates the stage-by-stage recycling process for glass bottles and jars, "
+                "operating as a continuous loop.\n"
+                "Overall, the process comprises seven key stages, starting with the collection of used glass "
+                "and culminating in the distribution of new glass items to retail outlets, allowing the cycle to repeat.\n"
+                "In the initial stage, consumers dispose of used glass in dedicated recycling bins, after which the "
+                "material is gathered and transported to a central recycling plant. Upon arrival, the glass undergoes "
+                "washing to remove contaminants before being sorted according to colour (typically clear, green, and brown). "
+                "The sorted glass is then crushed into small fragments known as cullet. Following this, the cullet is "
+                "transferred to a high-temperature furnace where it is melted into liquid glass. This molten glass is "
+                "subsequently poured into moulds to create new bottles and jars. Finally, these newly formed glass "
+                "containers are supplied to shops, completing the loop.\n"
+                "In conclusion, the diagram depicts a closed-loop recycling system that reclaims glass waste and "
+                "converts it into new consumer packaging."
             ),
             "task_achievement": 7,
             "coherence_cohesion": 7,
             "lexical_resource": 7,
             "grammatical_range": 7,
             "explanation": (
-                "The response describes the process clearly and accurately with a good overview "
-                "and effective passive constructions. It is well organised, though it could use "
-                "a wider range of vocabulary and sentence patterns."
+                "The answer provides a clear overview and logical sequencing of all stages. Passive voice is used "
+                "effectively throughout, and vocabulary is accurate and appropriate for Task 1."
             ),
             "improvement_tips": [
-                "Use more precise lexis: 'segregated', 'pulverised', 'granulated'.",
-                "Vary sentence structures with participles and relative clauses.",
-                "Add detail about why sorting by colour is important.",
-                "Round the description of the final stage for balance.",
-                "Use the passive voice consistently for mechanical stages.",
+                "Use more varied complex sentence structures such as participial phrases.",
+                "Incorporate additional process vocabulary like 'molten', 'reclaimed', 'remoulded'.",
+                "Avoid repeating 'glass' frequently by using pronouns or synonyms.",
+                "Refine stage grouping into collection/preparation vs thermal processing.",
+                "Ensure smooth transitions between mechanical and thermal stages.",
             ],
         },
         "9": {
             "band": 9,
             "answer_text": (
-                "The diagram outlines the recycling pathway for plastic bottles, a cyclical "
-                "system in which post-consumer waste is recovered, reprocessed and converted "
-                "into feedstock for new products.\n"
-                "The process comprises six sequential stages, from the point of disposal through "
-                "to the creation of new goods. Its defining characteristic is its closed-loop "
-                "nature: the pellets produced at the end serve as raw material, allowing the "
-                "cycle to recommence.\n"
-                "The journey begins when households deposit bottles in recycling bins. These are "
-                "then collected and conveyed to a sorting facility, where the bottles are "
-                "segregated by polymer type and colour to safeguard the purity of the recycled "
-                "output. Following sorting, the bottles are washed and shredded into flakes, "
-                "which are then subjected to heat and moulded into pellets. In the final stage, "
-                "these pellets are used as the basis for manufacturing new plastic products, "
-                "thereby closing the loop.\n"
-                "In essence, the diagram depicts a well-defined, self-renewing process that "
-                "converts a waste stream into a valuable resource."
+                "The diagram delineates the cyclical recycling process of glass containers, detailing the sequence "
+                "through which post-consumer glass waste is reprocessed into new glassware.\n"
+                "It is immediately evident that the process is closed-loop and consists of seven distinct stages. "
+                "These can be broadly categorised into three main phases: waste collection and sorting, mechanical "
+                "crushing and thermal melting, and finally, product remanufacturing and retail distribution.\n"
+                "The sequence commences with the disposal of used glass bottles into designated recycling bins by households. "
+                "Once collected, the glass is conveyed to a processing facility where it is thoroughly washed and "
+                "segregated by color—specifically clear, green, and brown—to maintain material purity. Subsequently, "
+                "the sorted glass is crushed into fine fragments, termed cullet. This cullet is then fed into a "
+                "high-temperature furnace, where intense heat transforms the solid particles into a molten liquid state. "
+                "The liquid glass is subsequently channelled into precision moulds to fabricate new bottles and jars. "
+                "Once cooled, these pristine glass products are dispatched to retail stores for consumer purchase, "
+                "thereby completing the cycle.\n"
+                "In summary, the diagram illustrates a fully renewable system that minimizes resource consumption by "
+                "endlessly recirculating glass packaging through mechanical and thermal reprocessing."
             ),
             "task_achievement": 9,
             "coherence_cohesion": 9,
             "lexical_resource": 9,
             "grammatical_range": 9,
             "explanation": (
-                "This response is exemplary: it frames the process analytically, uses a wide and "
-                "precise range of vocabulary, and handles complex grammar with complete accuracy. "
-                "The overview and conclusion are both insightful."
+                "An exceptional Band 9 response. It groups stages logically into cohesive phases, employs sophisticated "
+                "passive and participial grammar, and displays precise technical vocabulary throughout."
             ),
             "improvement_tips": [
-                "Keep industrial terminology precise and consistent.",
-                "Ensure every stage of the diagram is represented.",
-                "Balance technical detail with clarity.",
-                "Use varied complex structures without obscuring meaning.",
-                "Maintain the closed-loop framing throughout.",
+                "Maintain high precision in technical terminology throughout.",
+                "Balance detailed descriptions with overarching analytical points.",
+                "Ensure seamless cohesion between paragraph transitions.",
+                "Vary sentence length for optimal academic rhythm.",
+                "Sustain an authoritative impersonal register.",
             ],
         },
     },
-    # ---------------- Q21: Chocolate Production ----------------
+    # ---------------- Q21: Hydroelectric Power Generation ----------------
     21: {
         "5": {
             "band": 5,
             "answer_text": (
-                "The diagram shows how chocolate is made from cocoa beans.\n"
-                "First, the cocoa pods are harvested from the trees. Then the pods are opened "
-                "and the beans are removed. The beans are fermented for some days, and after "
-                "that they are dried in the sun. Then the dried beans are roasted. After "
-                "roasting, the beans are ground to make cocoa liquor. Then the cocoa liquor is "
-                "mixed with sugar and milk and pressed. Finally, the mixture is moulded and "
-                "cooled to make chocolate bars.\n"
-                "Overall, there are eight steps from the cocoa tree to the chocolate bar. The "
-                "process has two main parts: first the beans are prepared and processed, and "
-                "then the chocolate is made from the cocoa liquor."
+                "The diagram shows how electricity is made in a hydroelectric power station.\n"
+                "First, water is collected in a large reservoir behind a high dam. Then the water flows "
+                "down through an intake gate into a pipe called a penstock. The fast-flowing water turns "
+                "a turbine at high speed. After that, the spinning turbine powers a generator to make "
+                "electricity. Next, the electricity goes through a transformer, which increases the "
+                "voltage. Then the electricity is sent through high-voltage power lines to homes and "
+                "factories. Finally, the used water flows out into the river below the dam.\n"
+                "Overall, the process turns water energy into electrical power through several stages "
+                "from the reservoir to the power lines."
             ),
             "task_achievement": 5,
             "coherence_cohesion": 5,
             "lexical_resource": 5,
             "grammatical_range": 5,
             "explanation": (
-                "All eight stages are described in the correct order with accurate basic "
-                "information, but the language is simple and the sequencing repetitive. There is "
-                "little range or sophistication."
+                "The process is described in chronological order with accurate basic facts. However, the language "
+                "is simple and relies heavily on basic linkers like 'First', 'Then', 'After that'."
             ),
             "improvement_tips": [
-                "Add a clearer overview describing the two phases: farming/processing of beans and manufacture of chocolate.",
-                "Use more precise process verbs: 'extracted', 'fermented', 'conveyed'.",
-                "Vary the sequencing language used.",
-                "Use the passive voice consistently.",
-                "Describe the purpose of key stages (fermentation, roasting).",
+                "Write a clear overview paragraph highlighting the conversion of mechanical energy to electrical energy.",
+                "Use passive structures consistently (e.g. 'is channelled', 'is generated').",
+                "Incorporate technical terminology like 'potential energy', 'kinetic energy', 'step-up transformer'.",
+                "Vary sentence starters to avoid repetitive sequencing.",
+                "Group the mechanical stage (water flow/turbine) and electrical stage (generator/grid).",
             ],
         },
         "7": {
             "band": 7,
             "answer_text": (
-                "The diagram depicts the production of chocolate from cocoa beans, a process "
-                "spanning cultivation, processing and manufacturing.\n"
-                "Overall, the process involves eight distinct stages, which can be grouped into "
-                "two broad phases: the preparation of the beans and the manufacture of the "
-                "chocolate itself.\n"
-                "The process begins on the plantation, where cocoa pods are harvested and opened "
-                "to extract the beans. These beans are then fermented for several days and dried "
-                "in the sun, two steps essential for developing their flavour. The dried beans "
-                "are subsequently roasted and ground into a thick paste known as cocoa liquor. "
-                "This liquor is then combined with sugar and milk and pressed, before the "
-                "mixture is moulded and cooled to form finished chocolate bars.\n"
-                "In conclusion, the diagram shows a linear sequence of agricultural and "
-                "manufacturing stages that transforms raw cocoa beans into chocolate."
+                "The diagram illustrates the mechanism by which hydroelectric power stations generate electricity "
+                "from stored water.\n"
+                "Overall, the generation of hydroelectric power is a continuous linear process comprising seven main "
+                "stages. It begins with the storage of water behind a dam and concludes with the distribution of "
+                "electricity via the power grid and the discharge of water into a river.\n"
+                "Initially, water is impounded in a high-level reservoir retained by a dam. When electricity is needed, "
+                "an intake gate opens, allowing water to rush downwards through a sloping penstock pipe. The kinetic "
+                "energy of this rapidly flowing water rotates a turbine, which in turn drives an adjacent generator "
+                "to produce electricity. The generated electric power then passes through a transformer to adjust its "
+                "voltage for long-distance transmission. High-voltage power lines subsequently transport the electricity "
+                "to the national grid. Meanwhile, the water that passed through the turbine is safely discharged into the "
+                "river downstream.\n"
+                "In conclusion, the diagram demonstrates how potential energy stored in elevated water is converted first "
+                "into mechanical energy by the turbine and ultimately into electrical power for public distribution."
             ),
             "task_achievement": 7,
             "coherence_cohesion": 7,
             "lexical_resource": 7,
             "grammatical_range": 7,
             "explanation": (
-                "The response is clear, accurate and well structured, with an effective grouping "
-                "of the stages and good use of the passive voice. Vocabulary is appropriate, "
-                "though a little more sophistication would lift it."
+                "A clear, well-structured Band 7 response. It accurately describes the entire process using appropriate "
+                "technical vocabulary, strong passive voice constructions, and a logical progression of ideas."
             ),
             "improvement_tips": [
-                "Use more precise technical lexis: 'conched', 'tempered', 'winnowed'.",
-                "Vary the sentence structures across the eight stages.",
-                "Add explanatory clauses for the key processing steps.",
-                "Round the description of the final stages for balance.",
-                "Strengthen the analytical conclusion.",
+                "Use complex participial phrases to combine related mechanical steps.",
+                "Describe the turbine cross-section details if shown.",
+                "Vary connectives beyond 'Initially', 'subsequently', 'Meanwhile'.",
+                "Emphasize energy transformation terminology (potential to kinetic to electrical).",
+                "Ensure smooth transitions between hydro mechanics and power transmission.",
             ],
         },
         "9": {
             "band": 9,
             "answer_text": (
-                "The diagram illustrates the manufacture of chocolate from raw cocoa beans, "
-                "tracing a multi-stage process that moves from the plantation to the finished "
-                "product.\n"
-                "The process can be divided into two phases: an agricultural and preparatory "
-                "phase, in which the beans are harvested, fermented, dried and roasted, and a "
-                "manufacturing phase, in which the processed beans are ground, blended and "
-                "shaped into chocolate. Altogether, eight clearly defined stages are involved.\n"
-                "In the first phase, ripe cocoa pods are harvested from the trees and split "
-                "open to release the beans within. These are fermented over several days and "
-                "then sun-dried, procedures that develop the beans' characteristic flavour. "
-                "Following this, the dried beans are roasted and ground into cocoa liquor. The "
-                "second phase commences when this liquor is blended with sugar and milk and "
-                "pressed to achieve the desired consistency. Finally, the mixture is poured "
-                "into moulds, cooled, and thereby set into solid chocolate bars ready for "
-                "distribution.\n"
-                "In essence, the diagram portrays a largely linear, labour-intensive chain in "
-                "which a series of precise processing steps converts a tropical crop into a "
-                "widely consumed commodity."
+                "The diagram details the structural components and operational steps involved in generating electricity "
+                "within a hydroelectric power plant.\n"
+                "It is clear that hydroelectricity generation is a multi-step linear process that converts the potential "
+                "energy of impounded water into usable electrical energy. The process spans two main phases: the hydraulic "
+                "phase, involving water flow and mechanical turbine rotation, and the electrical phase, involving power "
+                "generation, step-up transformation, and grid distribution.\n"
+                "The process commences with water being impounded in an elevated reservoir behind a dam. Controlled release "
+                "via an intake gate channels the water into a descending penstock, where gravitational force accelerates "
+                "the flow. Upon reaching the bottom, the high-pressure water stream impinges on the blades of a turbine, "
+                "causing it to spin rapidly. This mechanical rotation drives an interconnected generator, converting "
+                "rotational kinetic energy into electrical power. The electricity produced is then fed into a transformer, "
+                "which elevates the voltage to minimize line losses during long-distance transmission over power lines. "
+                "Concurrently, the water discharged from the turbine is returned to the natural river system downstream.\n"
+                "In summary, the diagram depicts an efficient energy conversion system in which natural gravitational water "
+                "flow is harnessed through mechanical turbines and electromagnetic generators to supply electricity to the "
+                "power grid."
             ),
             "task_achievement": 9,
             "coherence_cohesion": 9,
             "lexical_resource": 9,
             "grammatical_range": 9,
             "explanation": (
-                "This is a fully developed and precisely expressed response. It structures the "
-                "process logically into phases, employs sophisticated and accurate vocabulary, "
-                "and demonstrates complete command of complex grammar and cohesive devices."
+                "An exemplary Band 9 response. It categorizes the system into hydraulic and electrical phases, utilizes "
+                "precise physics and engineering vocabulary, and exhibits immaculate grammatical control and cohesion."
             ),
             "improvement_tips": [
-                "Verify all stages against the diagram and keep them in order.",
-                "Keep the two-phase framing consistent.",
-                "Balance technical precision with natural flow.",
-                "Avoid over-length sentences in the detail paragraphs.",
-                "Ensure the conclusion synthesises, not repeats.",
+                "Sustain the precise technical register throughout.",
+                "Ensure all diagram components are referenced accurately.",
+                "Maintain seamless logical flow between sentences.",
+                "Vary sentence structures between simple, compound, and complex forms.",
+                "Keep the tone strictly objective and academic.",
             ],
         },
     },

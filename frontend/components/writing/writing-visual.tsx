@@ -324,7 +324,7 @@ export function WritingVisual({ data, imageUrl }: { data?: Record<string, unknow
       {imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={imageUrl}
+          src={imageUrl.startsWith("/") || imageUrl.startsWith("http") ? imageUrl : `/${imageUrl}`}
           alt="Writing prompt visual"
           className="mx-auto max-h-96 w-auto rounded-lg"
         />
