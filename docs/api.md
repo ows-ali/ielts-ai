@@ -222,6 +222,97 @@ Authorization: Bearer <SUPABASE_ACCESS_TOKEN>
 
 ---
 
+### Writing Task 1 Practice
+
+All writing endpoints require a valid Supabase Bearer token. Students can read
+questions/samples and submit answers; teachers additionally list all
+submissions and create/delete feedback.
+
+#### `GET /api/writing/questions`
+- **Description**: Lists writing questions, optionally filtered by `type`
+  (`line|bar|pie|table|map|process|multi`) and `difficulty`
+  (`easy|medium|hard`) via query params.
+- **Response `200 OK`**:
+  ```json
+  [
+    {
+      "id": "question-uuid",
+      "type": "map",
+      "title": "Island Before and After Tourist Development",
+      "prompt": "The two maps below show an island...",
+      "data_description": { "type": "map", "maps": ["Before", "After"], "before": [], "after": [] },
+      "image_url": "writing-images/island-before-after.png",
+      "difficulty": "easy"
+    }
+  ]
+  ```
+
+#### `GET /api/writing/questions/{question_id}`
+- **Description**: Gets a question with its three model samples (Band 5/7/9).
+- **Response `200 OK`**: `WritingQuestionDetail` = question fields plus
+  `samples: [WritingSampleOut]` (each with `band`, `answer_text`, the four
+  criterion sub-scores, `explanation`, `improvement_tips`).
+- **Error `404`**: Question not found.
+
+#### `GET /api/writing/questions/{question_id}/samples`
+- **Description**: Lists only the model samples for a question.
+- **Response `200 OK`**: Array of `WritingSampleOut`.
+
+#### `POST /api/writing/submissions`
+- **Description**: Creates a submission (student). Stores the answer and the
+  server-computed `word_count`.
+- **Request Body**:
+  ```json
+  {
+    "question_id": "question-uuid",
+    "answer_text": "The maps illustrate the transformation of the island... (at least 20 chars)"
+  }
+  ```
+- **Response `201 Created`**: `WritingSubmissionOut` with empty `feedback`.
+- **Error `422`**: Answer shorter than 20 characters. **Error `404`**:
+  Question not found.
+
+#### `GET /api/writing/submissions/me`
+- **Description**: Lists the current student's submissions, each with its
+  feedback list and the average `overall_band` across feedback.
+- **Response `200 OK`**: Array of `WritingSubmissionOut`.
+
+#### `GET /api/writing/submissions`
+- **Description**: Lists all submissions (teacher only). Students' answers are
+  visible to every teacher; feedback is nested per submission.
+- **Response `200 OK`**: Array of `WritingSubmissionOut`.
+
+#### `GET /api/writing/submissions/{submission_id}`
+- **Description**: Gets one submission including the full question prompt/data
+  and all feedback. Allowed for the owning student or any teacher.
+- **Response `200 OK`**: `WritingSubmissionDetailOut`.
+- **Error `403`**: Not the owner and not a teacher. **Error `404`**: Not found.
+
+#### `POST /api/writing/feedback`
+- **Description**: Creates teacher feedback on a submission (teacher only).
+  The server computes `overall_band` as the average of the four criteria.
+- **Request Body**:
+  ```json
+  {
+    "submission_id": "submission-uuid",
+    "task_achievement": 6,
+    "coherence_cohesion": 5,
+    "lexical_resource": 6,
+    "grammatical_range": 5,
+    "overall_comment": "Good structure but needs more linking words."
+  }
+  ```
+- **Response `200 OK`**: `WritingFeedbackOut` including `overall_band` and
+  `teacher_name`.
+- **Error `422`**: A criterion score is outside the 4–9 range. **Error `404`**:
+  Submission not found.
+
+#### `DELETE /api/writing/feedback/{feedback_id}`
+- **Description**: Deletes a feedback entry (teacher only).
+- **Response `204 No Content`**.
+
+---
+
 ## Supabase Realtime Channels
 
 | Channel Pattern | Table Subscribed | Target Audience | Triggered Events |

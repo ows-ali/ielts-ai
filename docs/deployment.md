@@ -82,6 +82,20 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_API_URL=https://your-backend-api.onrender.com
 ```
 
+### Vercel Analytics & Speed Insights
+- Both **Web Analytics** and **Speed Insights** are enabled in code via
+  `@vercel/analytics` and `@vercel/speed-insights` (rendered in the root
+  layout at `frontend/app/layout.tsx`).
+- They activate **automatically** on Vercel deployments — no env vars or
+  dashboard steps are required. Free on the Vercel Hobby plan.
+- Outside of Vercel (e.g. local `npm run dev`) they are inert.
+
+### Static Writing Diagrams
+- Writing Task 1 question images (maps, processes) are committed under
+  `frontend/public/writing-images/` and are served by Next.js at
+  `/writing-images/...`. No Supabase storage bucket is needed for them.
+- The frontend also renders SVG/text fallbacks for chart-based questions.
+
 ---
 
 ## 4. Verification Checklist
@@ -90,3 +104,5 @@ NEXT_PUBLIC_API_URL=https://your-backend-api.onrender.com
 - [ ] RLS policies enable students to upload `.webm`/`.mp4` recordings.
 - [ ] Supabase Realtime channel connections succeed over WebSockets (`wss://`).
 - [ ] Audio playback URL is accessible via HTTPS on student reports.
+- [ ] Writing migrations applied (`20260805_writing_tables.sql`) and seeded (`scripts.seed_writing`).
+- [ ] Writing diagrams load under `/writing-images/` on the deployed frontend.

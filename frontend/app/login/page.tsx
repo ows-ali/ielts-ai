@@ -8,6 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
+const DEMO_ACCOUNTS = [
+  { role: "Teacher 1", email: "teacher1@example.com", pass: "DummyPass123!", color: "indigo" },
+  { role: "Teacher 2", email: "teacher2@example.com", pass: "DummyPass123!", color: "indigo" },
+  { role: "Student 1", email: "student1@example.com", pass: "DummyPass123!", color: "emerald" },
+  { role: "Student 2", email: "student2@example.com", pass: "DummyPass123!", color: "emerald" },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -15,44 +22,68 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      /* ignore clipboard errors */
+    }
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
+    setLoadingMessage("Signing in...");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        setLoadingMessage("");
+        return;
+      }
+      setLoadingMessage("Verifying profile...");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/me`,
+        {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+          cache: "no-store",
+        }
+      );
+      if (!res.ok) {
+        if (res.status === 401) {
+          await supabase.auth.signOut();
+        }
+        let detail = "Failed to load your profile.";
+        try {
+          const body = await res.json();
+          detail = typeof body.detail === "string" ? body.detail : detail;
+        } catch {
+          /* ignore */
+        }
+        setError(detail);
+        setLoading(false);
+        setLoadingMessage("");
+        return;
+      }
+      const me = await res.json();
+      setLoadingMessage(me.role === "teacher" ? "Redirecting to Teacher Dashboard..." : "Redirecting to Student Dashboard...");
+      router.replace(me.role === "teacher" ? "/teacher" : "/student");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      setLoading(false);
+      setLoadingMessage("");
     }
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/me`,
-      {
-        headers: { Authorization: `Bearer ${data.session.access_token}` },
-        cache: "no-store",
-      }
-    );
-    if (!res.ok) {
-      if (res.status === 401) {
-        await supabase.auth.signOut();
-      }
-      let detail = "Failed to load your profile.";
-      try {
-        const body = await res.json();
-        detail = typeof body.detail === "string" ? body.detail : detail;
-      } catch {
-        /* ignore */
-      }
-      setError(detail);
-      return;
-    }
-    const me = await res.json();
-    router.replace(me.role === "teacher" ? "/teacher" : "/student");
-    router.refresh();
   }
 
   return (
@@ -97,10 +128,11 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   required
+                  disabled={loading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="bg-slate-900/90 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                  className="bg-slate-900/90 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20 disabled:opacity-50"
                 />
               </div>
               <div className="space-y-1.5">
@@ -111,10 +143,11 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   required
+                  disabled={loading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="bg-slate-900/90 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20"
+                  className="bg-slate-900/90 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20 disabled:opacity-50"
                 />
               </div>
               {error && (
@@ -122,12 +155,31 @@ export default function LoginPage() {
                   {error}
                 </div>
               )}
+              {loading && (
+                <div className="flex items-center gap-3 rounded-lg bg-indigo-500/15 border border-indigo-500/30 p-3 text-xs font-medium text-indigo-200 animate-pulse">
+                  <svg className="animate-spin h-4 w-4 shrink-0 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>{loadingMessage || "Signing in... Please wait"}</span>
+                </div>
+              )}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200"
+                className="w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition-all duration-200 disabled:opacity-75"
                 disabled={loading}
               >
-                {loading ? "Signing in..." : "Sign in"}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>{loadingMessage || "Signing in..."}</span>
+                  </span>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
             </form>
             <p className="mt-6 text-center text-xs text-slate-400">
@@ -139,18 +191,104 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Demo Users Hint */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-4 text-xs text-slate-400 space-y-2 backdrop-blur-md">
-          <p className="font-semibold text-slate-300 uppercase tracking-wider">Quick Demo Accounts:</p>
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div>
-              <span className="font-medium text-indigo-400">Teacher:</span> teacher1@example.com
-            </div>
-            <div>
-              <span className="font-medium text-emerald-400">Student:</span> student1@example.com
-            </div>
+        {/* Demo Users Section */}
+        <div className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-4 text-xs text-slate-400 space-y-3 backdrop-blur-md">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-slate-200 uppercase tracking-wider text-[11px]">
+              Quick Demo Accounts
+            </span>
+            <span className="text-[10px] text-slate-500">1-Click Copy & Fill</span>
           </div>
-          <p className="text-[10px] text-slate-500">Password for demo accounts: <code className="text-slate-300">DummyPass123!</code></p>
+
+          <div className="grid gap-2">
+            {DEMO_ACCOUNTS.map((acc) => {
+              const emailKey = `email-${acc.email}`;
+              const passKey = `pass-${acc.email}`;
+              const isTeacher = acc.color === "indigo";
+              return (
+                <div
+                  key={acc.email}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-slate-800/60 bg-slate-900/60 p-2.5 transition-colors hover:border-slate-700/80"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                          isTeacher
+                            ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                            : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        }`}
+                      >
+                        {acc.role}
+                      </span>
+                      <span className="truncate text-[12px] font-medium text-slate-200">
+                        {acc.email}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <span>Pass:</span>
+                      <code className="text-slate-300 bg-slate-950/80 px-1 py-0.2 rounded font-mono">
+                        {acc.pass}
+                      </code>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 pt-1 sm:pt-0">
+                    {/* Copy Email Button */}
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(acc.email, emailKey)}
+                      title="Copy Email"
+                      className="flex items-center gap-1 rounded bg-slate-800/80 px-2 py-1 text-[10px] font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                    >
+                      {copiedKey === emailKey ? (
+                        <span className="text-emerald-400 font-bold">Copied ✓</span>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          <span>Email</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Copy Password Button */}
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(acc.pass, passKey)}
+                      title="Copy Password"
+                      className="flex items-center gap-1 rounded bg-slate-800/80 px-2 py-1 text-[10px] font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                    >
+                      {copiedKey === passKey ? (
+                        <span className="text-emerald-400 font-bold">Copied ✓</span>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z" />
+                          </svg>
+                          <span>Pass</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Autofill Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(acc.email);
+                        setPassword(acc.pass);
+                      }}
+                      title="Autofill credentials into sign in form"
+                      className="flex items-center gap-1 rounded bg-indigo-600/30 border border-indigo-500/40 px-2 py-1 text-[10px] font-bold text-indigo-300 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      ⚡ Fill
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </main>
