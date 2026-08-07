@@ -63,6 +63,11 @@ diagrams live in `frontend/public/writing-images/` and are served by Next.js
    uncheck "restrict file uploads"). Audio recordings live here.
 4. Enable Realtime on the `rooms` and `participants` tables if you want live
    turn updates (the UI also polls as a fallback).
+5. For **password reset**, add the reset page to Auth → URL Configuration →
+   Redirect URLs: `http://localhost:3000/reset-password` (dev) and
+   `https://<your-vercel-domain>/reset-password` (prod). Emails are sent via
+   the Supabase email provider (Auth → Providers → Email enabled; already
+   required for signup confirmation).
 
 > Writing question diagrams are committed under `frontend/public/writing-images/`
 > and served directly by the frontend — no bucket upload required.
@@ -121,12 +126,15 @@ npm run dev                                       # http://localhost:3000
 ## Using the app
 
 1. **Register** as a teacher or student (email + password).
-2. **Teacher**: create a room, choose Part 1/2/3, share the room code →
+2. **Forgot your password?** Use the **Forgot password?** link on the sign-in
+   page — you'll get an email with a link to set a new password on the
+   `/reset-password` page.
+3. **Teacher**: create a room, choose Part 1/2/3, share the room code →
    start the session when students join.
-3. **Student**: enter the room code, wait for your turn, record your answer.
-4. The AI transcribes (Gemini Flash), evaluates against the IELTS band
+4. **Student**: enter the room code, wait for your turn, record your answer.
+5. The AI transcribes (Gemini Flash), evaluates against the IELTS band
    descriptors (Gemini Pro + RAG), and returns a band score with feedback.
-5. **Teacher** sees live progress and a class report with average band and
+6. **Teacher** sees live progress and a class report with average band and
    common problems. **Students** see their history in *My progress*.
 
 ### Writing practice

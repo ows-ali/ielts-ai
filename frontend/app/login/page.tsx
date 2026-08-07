@@ -147,6 +147,14 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className="bg-slate-900/90 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/20 disabled:opacity-50"
                 />
+                <div className="flex justify-end">
+                  <a
+                    href="/forgot-password"
+                    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
               </div>
               {error && (
                 <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs font-medium text-rose-400">
