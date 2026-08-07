@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -89,12 +90,12 @@ export default function LoginPage() {
       {/* Background Ambient Glows */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-600/20 via-violet-600/20 to-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <a
+      <Link
         href="/"
         className="absolute left-4 top-4 sm:left-6 sm:top-6 z-10 inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-1.5 text-xs font-semibold text-slate-300 backdrop-blur-md transition-colors hover:bg-slate-700 hover:text-white"
       >
         ← Back to home
-      </a>
+      </Link>
 
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Fancy Logo Branding */}

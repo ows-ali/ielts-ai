@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { LeaderboardPreview } from "@/components/landing/leaderboard-preview";
@@ -8,6 +8,11 @@ const week: LeaderboardEntry[] = [
   { user_id: "u1", name: "Alice", badge_count: 3, week_points: 5, all_points: 12, avg_band: 7.0 },
   { user_id: "u2", name: "Bob", badge_count: 1, week_points: 2, all_points: 4, avg_band: 5.5 },
 ];
+
+const leaderboard = () =>
+  within(
+    screen.getByRole("heading", { name: "Top Students This Week" }).closest(".rounded-2xl") as HTMLElement,
+  );
 
 const activity: ActivityEvent[] = [
   {
@@ -32,9 +37,9 @@ describe("LeaderboardPreview", () => {
   it("shows only the top students from the weekly board", () => {
     render(<LeaderboardPreview week={week} activity={activity} />);
     expect(screen.getByText("Top Students This Week")).toBeInTheDocument();
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
-    expect(screen.getByText("5 pts")).toBeInTheDocument();
+    expect(leaderboard().getByText("Alice")).toBeInTheDocument();
+    expect(leaderboard().getByText("Bob")).toBeInTheDocument();
+    expect(leaderboard().getByText((_, el) => el?.textContent === "5 pts")).toBeInTheDocument();
   });
 
   it("links to the full community page", () => {
@@ -45,8 +50,8 @@ describe("LeaderboardPreview", () => {
 
   it("links each student to their public profile", () => {
     render(<LeaderboardPreview week={week} activity={activity} />);
-    expect(screen.getByRole("link", { name: "Alice" })).toHaveAttribute("href", "/profile/u1");
-    expect(screen.getByRole("link", { name: "Bob" })).toHaveAttribute("href", "/profile/u2");
+    expect(leaderboard().getByRole("link", { name: "Alice" })).toHaveAttribute("href", "/profile/u1");
+    expect(leaderboard().getByRole("link", { name: "Bob" })).toHaveAttribute("href", "/profile/u2");
   });
 
   it("shows recent activity with actor and detail", () => {
