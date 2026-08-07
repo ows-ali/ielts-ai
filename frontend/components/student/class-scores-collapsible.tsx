@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,7 +104,12 @@ export function ClassScoresCollapsible({
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-1.5 font-semibold text-slate-900">
-                          <span>{p.student_name ?? "Student"}</span>
+                          <Link
+                            href={`/profile/${p.student_id}`}
+                            className="hover:text-indigo-600 hover:underline underline-offset-2"
+                          >
+                            {p.student_name ?? "Student"}
+                          </Link>
                           {isYou && (
                             <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">
                               You

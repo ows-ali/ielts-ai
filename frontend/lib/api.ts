@@ -1,9 +1,12 @@
 import type { Session } from "@supabase/supabase-js";
 
 import type {
+  BadgeSummary,
   ClassReport,
+  Community,
   Evaluation,
   Participant,
+  PublicProfile,
   Question,
   Room,
   RoomScoresOut,
@@ -181,4 +184,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ submission_id: submissionId, ...scores }),
     }),
+
+  myBadges: (s: Session | null) => request<BadgeSummary>("/api/me/badges", s),
+
+  publicProfile: (s: Session | null, userId: string) =>
+    request<PublicProfile>(`/api/users/${userId}/profile`, s),
+
+  community: (s: Session | null) => request<Community>("/api/community", s),
 };

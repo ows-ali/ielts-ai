@@ -374,3 +374,120 @@ async def get_user_name(user_id: str) -> str | None:
     if data and data.data:
         return data.data.get("name")
     return None
+
+
+# ---------------------------------------------------------------------------
+# Badges / public profiles / community
+# ---------------------------------------------------------------------------
+
+
+async def list_students() -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("users")
+        .select("id, name, role, created_at")
+        .eq("role", "student")
+        .execute()
+    )
+    return data.data or []
+
+
+async def get_public_user(user_id: str) -> dict | None:
+    """Public-safe user row (no email)."""
+    client = await _client()
+    data = (
+        await client.table("users")
+        .select("id, name, role, created_at")
+        .eq("id", user_id)
+        .maybe_single()
+        .execute()
+    )
+    return data.data if data else None
+
+
+async def get_student_evaluations(student_id: str) -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("evaluations")
+        .select("id, fluency, grammar, vocabulary, pronunciation, overall_band, created_at")
+        .eq("student_id", student_id)
+        .execute()
+    )
+    return data.data or []
+
+
+async def get_student_speaking_parts(student_id: str) -> list[int]:
+    client = await _client()
+    data = (
+        await client.table("answers")
+        .select("rooms(part)")
+        .eq("student_id", student_id)
+        .execute()
+    )
+    parts: set[int] = set()
+    for row in data.data or []:
+        room = row.get("rooms")
+        if isinstance(room, dict) and room.get("part") is not None:
+            parts.add(int(room["part"]))
+    return sorted(parts)
+
+
+async def get_student_writing_progress(student_id: str) -> tuple[list[dict], list[dict]]:
+    """Return (writing_submissions, writing_feedback) for one student."""
+    client = await _client()
+    subs = (
+        await client.table("writing_submissions")
+        .select("id, part, writing_questions(type)")
+        .eq("student_id", student_id)
+        .execute()
+    )
+    feedback = (
+        await client.table("writing_feedback")
+        .select("id, overall_band, created_at, writing_submissions!inner(student_id)")
+        .eq("writing_submissions.student_id", student_id)
+        .execute()
+    )
+    return subs.data or [], feedback.data or []
+
+
+async def list_all_evaluations_brief() -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("evaluations")
+        .select(
+            "id, student_id, fluency, grammar, vocabulary, pronunciation, "
+            "overall_band, created_at"
+        )
+        .execute()
+    )
+    return data.data or []
+
+
+async def list_all_writing_submissions_brief() -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("writing_submissions")
+        .select("id, student_id, part, created_at, writing_questions(type)")
+        .execute()
+    )
+    return data.data or []
+
+
+async def list_all_writing_feedback_brief() -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("writing_feedback")
+        .select("id, overall_band, created_at, writing_submissions!inner(student_id)")
+        .execute()
+    )
+    return data.data or []
+
+
+async def list_all_answers_brief() -> list[dict]:
+    client = await _client()
+    data = (
+        await client.table("answers")
+        .select("id, student_id, rooms(part)")
+        .execute()
+    )
+    return data.data or []

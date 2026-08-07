@@ -325,6 +325,111 @@ param (default `1`); pass `part=2` for essays. Task 1 question types are
 
 ---
 
+### Badges, Public Profiles & Community
+
+Badges are computed on-the-fly from existing activity (no extra tables). All
+endpoints require a valid Supabase Bearer token.
+
+#### `GET /api/me/badges`
+- **Description**: Returns the current user's badge summary and aggregate stats.
+- **Response `200 OK`**:
+  ```json
+  {
+    "user_id": "student-uuid",
+    "earned_count": 3,
+    "total_count": 17,
+    "badges": [
+      {
+        "id": "first_step",
+        "name": "First Step",
+        "emoji": "🎙️",
+        "category": "speaking",
+        "description": "Complete your first speaking exercise.",
+        "earned": true,
+        "progress": null
+      },
+      {
+        "id": "task1_explorer",
+        "name": "Task 1 Explorer",
+        "emoji": "📊",
+        "category": "writing",
+        "description": "Submit answers for all 7 Task 1 question types.",
+        "earned": false,
+        "progress": { "current": 3, "target": 7 }
+      }
+    ],
+    "stats": {
+      "total_speaking_attempts": 4,
+      "avg_speaking_band": 6.9,
+      "best_speaking_band": 7.5,
+      "speaking_parts": [1, 2],
+      "writing_submissions": 5,
+      "task1_types_done": ["bar", "line"],
+      "task2_types_done": [],
+      "writing_feedback_count": 2,
+      "best_writing_band": 7.0
+    }
+  }
+  ```
+
+#### `GET /api/users/{user_id}/profile`
+- **Description**: Public profile for any authenticated user. **Never exposes
+  email, audio, transcripts or answers** — only name, role, joined date,
+  earned badges and aggregate stats.
+- **Response `200 OK`**:
+  ```json
+  {
+    "id": "student-uuid",
+    "name": "Student One",
+    "role": "student",
+    "created_at": "2026-08-01T10:00:00Z",
+    "earned_count": 3,
+    "total_count": 17,
+    "badges": [ { "id": "first_step", "name": "First Step", "emoji": "🎙️",
+                   "category": "speaking", "description": "...",
+                   "earned": true, "progress": null } ],
+    "stats": { "total_speaking_attempts": 4, "avg_speaking_band": 6.9,
+               "best_speaking_band": 7.5, "speaking_parts": [1, 2],
+               "writing_submissions": 5, "task1_types_done": ["bar"],
+               "task2_types_done": [], "writing_feedback_count": 2,
+               "best_writing_band": 7.0 }
+  }
+  ```
+- **Error `404`**: User not found.
+
+#### `GET /api/community`
+- **Description**: Returns all four leaderboard/activity views in one payload.
+  - **`week`**: points earned in the current ISO week (Mon–Sun). 1 point per
+    speaking evaluation, writing submission, or writing feedback. Resets every
+    Monday so newcomers can always rank.
+  - **`all`**: lifetime points (same scoring).
+  - **`improvers`**: delta between average speaking band in the 2nd vs 1st half
+    of the last 30 days (students with 2nd-half activity only).
+  - **`activity`**: chronological feed of the 30 most recent actions (speaking
+    evaluation / writing submission / writing feedback).
+- **Response `200 OK`**:
+  ```json
+  {
+    "week": [
+      { "user_id": "student-uuid", "name": "Student One", "badge_count": 3,
+        "week_points": 5, "all_points": 12, "avg_band": 7.0, "improvement": null }
+    ],
+    "all": [],
+    "improvers": [
+      { "user_id": "student-uuid", "name": "Student One", "badge_count": 3,
+        "week_points": 5, "all_points": 12, "avg_band": 7.0, "improvement": 0.5 }
+    ],
+    "activity": [
+      { "id": "eval:uuid", "actor_id": "student-uuid", "actor_name": "Student One",
+        "kind": "speaking_evaluation",
+        "detail": "completed a speaking exercise and scored Band 7",
+        "created_at": "2026-08-07T08:00:00Z" }
+    ]
+  }
+  ```
+
+---
+
 ## Supabase Realtime Channels
 
 | Channel Pattern | Table Subscribed | Target Audience | Triggered Events |

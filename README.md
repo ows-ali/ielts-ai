@@ -4,7 +4,8 @@ Collaborative AI-powered IELTS practice. Teachers run live speaking
 rooms; students join with a code, answer IELTS questions by voice, get AI
 feedback, and teachers see a class report. Students can also practise
 **Writing Task 1** and **Writing Task 2** independently and receive manual
-feedback from teachers.
+feedback from teachers. A **badge system, public profiles and community
+leaderboards** keep students motivated.
 
 Built from `PRD.md`.
 
@@ -27,6 +28,17 @@ Built from `PRD.md`.
     Task 1, 250-word target for Task 2) and draft autosave.
   - Multiple teachers can leave feedback on any submission; students see all
     feedback and an overall band.
+- **Motivation & community**:
+  - **Achievement badges**: 17 badges computed from real activity (speaking
+    attempt counts, band milestones, Part 1/2/3 coverage, balanced sub-scores,
+    writing submissions, Task 1/2 type coverage, feedback milestones).
+  - **Public profiles**: `/profile/<user-id>` shows any student's name, badges
+    and aggregate stats (never emails, audio or answers).
+  - **Community leaderboards** (`/community`): a weekly board that resets every
+    Monday (so newcomers can always rank), an all-time board, a 30-day
+    "Improvers" board, and a live activity feed where every new practice shows up.
+  - Student names are clickable throughout (class scores, leaderboards,
+    activity) and link to the student's public profile.
 
 ## Architecture
 
@@ -150,6 +162,17 @@ npm run dev                                       # http://localhost:3000
    leave feedback. Students see all feedback and the average overall band.
 5. **Teacher**: open **Writing → Task 1** or **Task 2** review to review pending
    submissions and grade them.
+
+### Badges, profiles & community
+
+1. Earn **badges** by practising — speaking attempts, band milestones and
+   writing coverage all count. Your earned badges appear on the student home
+   page and your public profile.
+2. Open **Community** (in the navbar) to see the **This Week** board (resets
+   every Monday), **All Time**, **Improvers** (30-day band improvement) and the
+   live **Activity** feed.
+3. Click any student's name to open their **public profile** — badges and
+   aggregate stats only, never emails or answers.
 
 ## Deployment
 

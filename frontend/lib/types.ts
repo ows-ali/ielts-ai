@@ -180,3 +180,79 @@ export interface WritingSubmissionDetail extends WritingSubmission {
   question_image_url?: string | null;
   question_difficulty?: string | null;
 }
+
+export interface BadgeProgress {
+  current: number;
+  target: number;
+}
+
+export type BadgeCategory = "speaking" | "writing";
+
+export interface Badge {
+  id: string;
+  name: string;
+  emoji: string;
+  category: BadgeCategory;
+  description: string;
+  earned: boolean;
+  progress?: BadgeProgress | null;
+}
+
+export interface ProfileStats {
+  total_speaking_attempts: number;
+  avg_speaking_band: number | null;
+  best_speaking_band: number | null;
+  speaking_parts: number[];
+  writing_submissions: number;
+  task1_types_done: string[];
+  task2_types_done: string[];
+  writing_feedback_count: number;
+  best_writing_band: number | null;
+}
+
+export interface BadgeSummary {
+  user_id: string;
+  earned_count: number;
+  total_count: number;
+  badges: Badge[];
+  stats: ProfileStats;
+}
+
+export interface PublicProfile {
+  id: string;
+  name: string;
+  role: Role;
+  created_at?: string | null;
+  earned_count: number;
+  total_count: number;
+  badges: Badge[];
+  stats: ProfileStats;
+}
+
+export interface LeaderboardEntry {
+  user_id: string;
+  name: string;
+  badge_count: number;
+  week_points: number;
+  all_points: number;
+  avg_band: number | null;
+  improvement?: number | null;
+}
+
+export type ActivityKind = "speaking_evaluation" | "writing_submission" | "writing_feedback";
+
+export interface ActivityEvent {
+  id: string;
+  actor_id: string;
+  actor_name: string;
+  kind: ActivityKind;
+  detail: string;
+  created_at: string;
+}
+
+export interface Community {
+  week: LeaderboardEntry[];
+  all: LeaderboardEntry[];
+  improvers: LeaderboardEntry[];
+  activity: ActivityEvent[];
+}
