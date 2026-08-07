@@ -327,8 +327,12 @@ param (default `1`); pass `part=2` for essays. Task 1 question types are
 
 ### Badges, Public Profiles & Community
 
-Badges are computed on-the-fly from existing activity (no extra tables). All
-endpoints require a valid Supabase Bearer token.
+Badges are computed on-the-fly from existing activity (no extra tables).
+
+- `GET /api/me/badges` requires a valid Supabase Bearer token.
+- `GET /api/users/{user_id}/profile` and `GET /api/community` are **public** —
+  no auth header needed (used by the public landing page and guest-visible
+  profile/community pages).
 
 #### `GET /api/me/badges`
 - **Description**: Returns the current user's badge summary and aggregate stats.
@@ -373,9 +377,10 @@ endpoints require a valid Supabase Bearer token.
   ```
 
 #### `GET /api/users/{user_id}/profile`
-- **Description**: Public profile for any authenticated user. **Never exposes
+- **Description**: Public profile — **no auth required**. **Never exposes
   email, audio, transcripts or answers** — only name, role, joined date,
-  earned badges and aggregate stats.
+  **earned badges only** (locked catalog badges are filtered out) and
+  aggregate stats. `earned_count`/`total_count` are still included.
 - **Response `200 OK`**:
   ```json
   {
@@ -398,7 +403,7 @@ endpoints require a valid Supabase Bearer token.
 - **Error `404`**: User not found.
 
 #### `GET /api/community`
-- **Description**: Returns all four leaderboard/activity views in one payload.
+- **Description**: Public — **no auth required**. Returns all four leaderboard/activity views in one payload.
   - **`week`**: points earned in the current ISO week (Mon–Sun). 1 point per
     speaking evaluation, writing submission, or writing feedback. Resets every
     Monday so newcomers can always rank.

@@ -7,7 +7,7 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
-import { getUserOrRedirect } from "@/lib/auth";
+import { getUserOrNull } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,7 @@ export default async function PublicProfilePage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = await params;
-  const { user, session } = await getUserOrRedirect();
+  const { session, user } = await getUserOrNull();
 
   let profile;
   try {
@@ -26,11 +26,11 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const isSelf = profile.id === user.id;
+  const isSelf = !!user && profile.id === user.id;
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Navbar userRole={user.role} userName={user.name} />
+      <Navbar userRole={user?.role ?? null} userName={user?.name ?? null} />
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 p-6 text-white shadow-xl shadow-indigo-950/10">
@@ -77,7 +77,7 @@ export default async function PublicProfilePage({
             <CardTitle>Achievement Badges</CardTitle>
           </CardHeader>
           <CardContent>
-            <BadgeGrid badges={profile.badges} />
+            <BadgeGrid badges={profile.badges} showLocked={false} />
           </CardContent>
         </Card>
 

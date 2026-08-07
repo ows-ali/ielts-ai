@@ -292,10 +292,28 @@ class Flow:
                 str(body),
             )
             check(
+                "profile shows only earned badges",
+                isinstance(body.get("badges"), list)
+                and all(b.get("earned") for b in body["badges"])
+                and len(body["badges"]) == body.get("earned_count"),
+                str(body),
+            )
+            check(
                 "profile has aggregate stats",
                 isinstance(body.get("stats"), dict),
                 str(body),
             )
+
+        # The profile endpoint is public: must work without any token.
+        anon_profile = self.http.get(
+            f"{self.api}/api/users/{self.student_id}/profile",
+            headers={"Content-Type": "application/json"},
+        )
+        check(
+            "public profile works without auth",
+            anon_profile.status_code == 200,
+            anon_profile.text,
+        )
 
         profile404 = self.http.get(
             f"{self.api}/api/users/{uuid.uuid4()}/profile",
@@ -307,6 +325,16 @@ class Flow:
             f"{self.api}/api/community", headers=_bearer(self.student_token)
         )
         check("GET /api/community", community.status_code == 200, community.text)
+
+        anon_community = self.http.get(
+            f"{self.api}/api/community",
+            headers={"Content-Type": "application/json"},
+        )
+        check(
+            "public community works without auth",
+            anon_community.status_code == 200,
+            anon_community.text,
+        )
         if community.status_code == 200:
             body = community.json()
             week_ids = [e["user_id"] for e in body.get("week", [])]
@@ -334,6 +362,8 @@ class Flow:
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description="Run the badges/community integration test.")
     parser.add_argument("--api", default="http://localhost:8000")
     args = parser.parse_args()

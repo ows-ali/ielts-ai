@@ -1,7 +1,7 @@
 import { CommunityTabs } from "@/components/community/community-tabs";
 import { Navbar } from "@/components/navbar";
 import { api } from "@/lib/api";
-import { getUserOrRedirect } from "@/lib/auth";
+import { getUserOrNull } from "@/lib/auth";
 import type { Community } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const EMPTY: Community = { week: [], all: [], improvers: [], activity: [] };
 
 export default async function CommunityPage() {
-  const { user, session } = await getUserOrRedirect();
+  const { user, session } = await getUserOrNull();
 
   let data: Community = EMPTY;
   try {
@@ -20,7 +20,7 @@ export default async function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Navbar userRole={user.role} userName={user.name} />
+      <Navbar userRole={user?.role ?? null} userName={user?.name ?? null} />
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-900 via-indigo-850 to-slate-900 p-6 text-white shadow-xl shadow-indigo-950/10">

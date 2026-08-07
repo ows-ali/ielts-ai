@@ -193,7 +193,16 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                 <span className="max-w-[90px] sm:max-w-[150px] truncate">{displayName}</span>
               </div>
             )}
-            <SignOutButton className="text-xs px-2.5 py-1 h-8" />
+            {userRole ? (
+              <SignOutButton className="text-xs px-2.5 py-1 h-8" />
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-indigo-600/30 transition-colors hover:from-indigo-500 hover:to-violet-500"
+              >
+                Log in
+              </Link>
+            )}
           </div>
         </div>
 

@@ -24,6 +24,22 @@ export async function getUserOrRedirect(): Promise<{ session: NonNullable<Awaite
   return { session, user };
 }
 
+export async function getUserOrNull(): Promise<{
+  session: Awaited<ReturnType<typeof getSession>>;
+  user: User | null;
+}> {
+  const session = await getSession();
+  if (!session) {
+    return { session: null, user: null };
+  }
+  try {
+    const user = await api.me(session);
+    return { session, user };
+  } catch {
+    return { session: null, user: null };
+  }
+}
+
 export async function requireTeacher() {
   const { user, session } = await getUserOrRedirect();
   if (user.role !== "teacher") {
