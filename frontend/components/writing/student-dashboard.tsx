@@ -19,6 +19,12 @@ const TYPE_META: Record<WritingQuestionType, { label: string; emoji: string }> =
   map: { label: "Maps", emoji: "🗺️" },
   process: { label: "Processes", emoji: "⚙️" },
   multi: { label: "Mixed Charts", emoji: "📚" },
+  opinion: { label: "Opinion Essays", emoji: "💭" },
+  discussion: { label: "Discussion Essays", emoji: "⚖️" },
+  advantages: { label: "Advantages & Disadvantages", emoji: "👍" },
+  problem_solution: { label: "Problem & Solution", emoji: "🛠️" },
+  positive_negative: { label: "Positive / Negative", emoji: "📈" },
+  double_question: { label: "Two-Part Questions", emoji: "❓" },
 };
 
 const DIFFICULTY_STYLES: Record<string, string> = {
@@ -27,18 +33,20 @@ const DIFFICULTY_STYLES: Record<string, string> = {
   hard: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const FILTERS: ("all" | WritingQuestionType)[] = [
-  "all",
-  "line",
-  "bar",
-  "pie",
-  "table",
-  "map",
-  "process",
-  "multi",
-];
+const FILTERS: Record<number, ("all" | WritingQuestionType)[]> = {
+  1: ["all", "line", "bar", "pie", "table", "map", "process", "multi"],
+  2: [
+    "all",
+    "opinion",
+    "discussion",
+    "advantages",
+    "problem_solution",
+    "positive_negative",
+    "double_question",
+  ],
+};
 
-export function WritingDashboard({ session }: { session: Session }) {
+export function WritingDashboard({ session, part = 1 }: { session: Session; part?: number }) {
   const [questions, setQuestions] = useState<WritingQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState<"all" | WritingQuestionType>("all");
@@ -54,6 +62,7 @@ export function WritingDashboard({ session }: { session: Session }) {
       .writingQuestions(session, {
         type: type === "all" ? undefined : type,
         difficulty: difficulty === "all" ? undefined : difficulty,
+        part,
       })
       .then((qs) => {
         if (mounted) {
@@ -72,7 +81,7 @@ export function WritingDashboard({ session }: { session: Session }) {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, type, difficulty]);
+  }, [session, type, difficulty, part]);
 
   const grouped = useMemo(() => {
     if (type !== "all") {
@@ -91,7 +100,7 @@ export function WritingDashboard({ session }: { session: Session }) {
       <Card>
         <CardContent className="py-4">
           <div className="flex flex-wrap items-center gap-1.5">
-            {FILTERS.map((f) => (
+            {FILTERS[part]?.map((f) => (
               <button
                 key={f}
                 type="button"
@@ -150,7 +159,7 @@ export function WritingDashboard({ session }: { session: Session }) {
               {qs.map((q) => (
                 <Link
                   key={q.id}
-                  href={`/student/writing/${q.id}`}
+                  href={`/student/writing/${part === 2 ? "part2/" : ""}${q.id}`}
                   className="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-2">

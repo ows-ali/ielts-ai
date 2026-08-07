@@ -18,9 +18,15 @@ const TYPE_LABELS: Record<string, string> = {
   map: "Map",
   process: "Process",
   multi: "Mixed",
+  opinion: "Opinion",
+  discussion: "Discussion",
+  advantages: "Advantages",
+  problem_solution: "Problem/Solution",
+  positive_negative: "Positive/Negative",
+  double_question: "Two-part",
 };
 
-export function WritingHistory({ session }: { session: Session }) {
+export function WritingHistory({ session, part = 1 }: { session: Session; part?: number }) {
   const [submissions, setSubmissions] = useState<WritingSubmission[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +35,7 @@ export function WritingHistory({ session }: { session: Session }) {
   useEffect(() => {
     let mounted = true;
     api
-      .myWritingSubmissions(session)
+      .myWritingSubmissions(session, part)
       .then((rows) => {
         if (mounted) setSubmissions(rows);
       })
@@ -43,7 +49,7 @@ export function WritingHistory({ session }: { session: Session }) {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session, part]);
 
   if (!submissions) {
     return (
@@ -63,7 +69,10 @@ export function WritingHistory({ session }: { session: Session }) {
         <CardContent className="py-12 text-center">
           <p className="text-slate-500">
             You haven&apos;t submitted any writing answers yet.{" "}
-            <Link href="/student/writing" className="font-semibold text-indigo-600 hover:underline">
+            <Link
+              href={part === 2 ? "/student/writing/part2" : "/student/writing"}
+              className="font-semibold text-indigo-600 hover:underline"
+            >
               Start practicing now
             </Link>
           </p>

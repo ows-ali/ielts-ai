@@ -222,16 +222,23 @@ Authorization: Bearer <SUPABASE_ACCESS_TOKEN>
 
 ---
 
-### Writing Task 1 Practice
+### Writing Practice (Task 1 & Task 2)
 
 All writing endpoints require a valid Supabase Bearer token. Students can read
 questions/samples and submit answers; teachers additionally list all
 submissions and create/delete feedback.
 
+Both task types share the same tables, distinguished by a `part` column
+(`1` = Task 1, `2` = Task 2). List endpoints accept an optional `part` query
+param (default `1`); pass `part=2` for essays. Task 1 question types are
+`line|bar|pie|table|map|process|multi`; Task 2 types are
+`opinion|discussion|advantages|problem_solution|positive_negative|double_question`.
+
 #### `GET /api/writing/questions`
-- **Description**: Lists writing questions, optionally filtered by `type`
-  (`line|bar|pie|table|map|process|multi`) and `difficulty`
-  (`easy|medium|hard`) via query params.
+- **Description**: Lists writing questions, optionally filtered by `type`,
+  `difficulty` (`easy|medium|hard`) and `part` (`1|2`, default `1`) via query
+  params. When `part` is omitted/`1` only Task 1 types are returned; `part=2`
+  returns only essay types.
 - **Response `200 OK`**:
   ```json
   [
@@ -242,15 +249,16 @@ submissions and create/delete feedback.
       "prompt": "The two maps below show an island...",
       "data_description": { "type": "map", "maps": ["Before", "After"], "before": [], "after": [] },
       "image_url": "writing-images/island-before-after.png",
-      "difficulty": "easy"
+      "difficulty": "easy",
+      "part": 1
     }
   ]
   ```
 
 #### `GET /api/writing/questions/{question_id}`
 - **Description**: Gets a question with its three model samples (Band 5/7/9).
-- **Response `200 OK`**: `WritingQuestionDetail` = question fields plus
-  `samples: [WritingSampleOut]` (each with `band`, `answer_text`, the four
+- **Response `200 OK`**: `WritingQuestionDetail` = question fields (incl. `part`)
+  plus `samples: [WritingSampleOut]` (each with `band`, `answer_text`, the four
   criterion sub-scores, `explanation`, `improvement_tips`).
 - **Error `404`**: Question not found.
 
@@ -259,13 +267,15 @@ submissions and create/delete feedback.
 - **Response `200 OK`**: Array of `WritingSampleOut`.
 
 #### `POST /api/writing/submissions`
-- **Description**: Creates a submission (student). Stores the answer and the
-  server-computed `word_count`.
+- **Description**: Creates a submission (student). Stores the answer, the
+  server-computed `word_count`, and the `part` (from the request body or the
+  question, defaulting to `1`).
 - **Request Body**:
   ```json
   {
     "question_id": "question-uuid",
-    "answer_text": "The maps illustrate the transformation of the island... (at least 20 chars)"
+    "answer_text": "The maps illustrate the transformation of the island... (at least 20 chars)",
+    "part": 1
   }
   ```
 - **Response `201 Created`**: `WritingSubmissionOut` with empty `feedback`.
@@ -274,13 +284,15 @@ submissions and create/delete feedback.
 
 #### `GET /api/writing/submissions/me`
 - **Description**: Lists the current student's submissions, each with its
-  feedback list and the average `overall_band` across feedback.
-- **Response `200 OK`**: Array of `WritingSubmissionOut`.
+  feedback list and the average `overall_band` across feedback. Accepts an
+  optional `part` query param to filter to one task.
+- **Response `200 OK`**: Array of `WritingSubmissionOut` (each includes `part`).
 
 #### `GET /api/writing/submissions`
 - **Description**: Lists all submissions (teacher only). Students' answers are
-  visible to every teacher; feedback is nested per submission.
-- **Response `200 OK`**: Array of `WritingSubmissionOut`.
+  visible to every teacher; feedback is nested per submission. Accepts an
+  optional `part` query param to filter to one task.
+- **Response `200 OK`**: Array of `WritingSubmissionOut` (each includes `part`).
 
 #### `GET /api/writing/submissions/{submission_id}`
 - **Description**: Gets one submission including the full question prompt/data

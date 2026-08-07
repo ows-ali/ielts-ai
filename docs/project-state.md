@@ -29,11 +29,13 @@ The **IELTS AI Speaking Classroom** is a real-time web application designed for 
 - ✅ **Classroom Feedback Summaries**: AI-driven aggregate analysis summarizing common class weaknesses using Gemini.
 - ✅ **Automated Testing Suite**: 39 Vitest frontend tests covering UI, hooks, and API layer; 12-step authorized backend end-to-end integration test flow (`scripts/test_flow.py`).
 - ✅ **Writing Task 1 Practice**: Standalone (non-room) writing practice with 26 curated questions across all 7 Task 1 types, 78 model answers (Band 5 / 7 / 9 per question with criterion sub-scores, "why this band" explanations and improvement tips), a word-counter editor with draft autosave, and multi-teacher manual feedback on student submissions. Question diagrams are served from `frontend/public/writing-images/` (SVG/text fallbacks for chart types).
+- ✅ **Writing Task 2 Practice**: Task 2 essays added on top of the same writing module via a `part` column (`1` = Task 1, `2` = Task 2). 24 curated essay questions across all 6 essay types (opinion, discussion, advantages & disadvantages, problem & solution, positive/negative development, two-part questions), 72 model answers (Band 5 / 7 / 9 per question), a 250-word target editor, and the same teacher review/feedback flow. Dedicated pages at `/student/writing/part2` and `/teacher/writing/part2`; navbar "Writing Task 2" links now active.
 
 ### In Progress / Newly Added
 - 🔄 **Teacher Navigation (Home Button)**: Direct navigation button from live room views back to the Teacher Dashboard.
 - 🔄 **Student Reports & Audio Playback**: Enhanced progress view with history cards and embedded HTML5 audio playback for past recorded answers.
 - 🔄 **Vercel Analytics & Speed Insights**: `@vercel/analytics` and `@vercel/speed-insights` wired into the root layout, ready for the Vercel deployment.
+- 🔄 **Writing Task 2 data seeding**: migration `20260807_writing_part2.sql` and `python -m scripts.seed_writing` still need to be run against the live Supabase project.
 
 ---
 
@@ -57,4 +59,4 @@ The **IELTS AI Speaking Classroom** is a real-time web application designed for 
 1. **Realtime Audio Streaming / WebRTC**: Explore lower latency live voice interaction between teacher and student.
 2. **Advanced Analytics**: Multi-session progress charts for students tracking band score trends over time.
 3. **Practice Question Library**: Teacher UI for managing custom question banks per part and topic.
-4. **Writing Task 2**: Add Part 2 practice (navbar already lists it as "coming soon").
+4. **Run Task 2 migration + seed**: apply `20260807_writing_part2.sql` in the Supabase SQL editor, then run `python -m scripts.seed_writing` (expect `Updated 26` for Task 1 + 24 new inserts for Task 2).

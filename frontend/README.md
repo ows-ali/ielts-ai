@@ -31,7 +31,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - `app/` — App Router pages (`/student/*`, `/teacher/*`, auth).
 - `components/` — Shared UI and feature components (`writing/` holds the
-  Writing Task 1 module).
+  Writing Task 1 & Task 2 module).
 - `lib/` — Supabase client, API client and shared types.
 - `public/writing-images/` — Static Writing Task 1 diagrams served at
   `/writing-images/...`.

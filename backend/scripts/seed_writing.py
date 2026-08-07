@@ -1,4 +1,4 @@
-"""Seed the writing Task 1 practice content into Supabase.
+"""Seed the writing Task 1 and Task 2 practice content into Supabase.
 
 Idempotent and non-destructive: matches questions by title and updates them
 in place (preserving their id), so existing student submissions and teacher
@@ -20,8 +20,13 @@ from dotenv import load_dotenv
 from supabase import AsyncClientOptions, create_async_client
 
 from scripts.writing_data import QUESTIONS, SAMPLES
+from scripts.writing_data_part2 import QUESTIONS as PART2_QUESTIONS
+from scripts.writing_data_part2 import SAMPLES as PART2_SAMPLES
 
 load_dotenv()
+
+PART1 = 1
+PART2 = 2
 
 NIL_UUID = "00000000-0000-0000-0000-000000000000"
 
@@ -52,50 +57,58 @@ async def main() -> None:
     updated = 0
     inserted = 0
 
-    for idx, q in enumerate(QUESTIONS):
-        question_payload = {
-            "type": q["type"],
-            "title": q["title"],
-            "prompt": q["prompt"],
-            "data_description": q.get("data_description"),
-            "image_url": q.get("image_url"),
-            "difficulty": q.get("difficulty", "medium"),
-        }
+    async def seed(questions: list[dict], samples: dict[int, dict[str, dict]], part: int) -> None:
+        nonlocal total_samples, updated, inserted
+        for idx, q in enumerate(questions):
+            question_payload = {
+                "part": part,
+                "type": q["type"],
+                "title": q["title"],
+                "prompt": q["prompt"],
+                "data_description": q.get("data_description"),
+                "image_url": q.get("image_url"),
+                "difficulty": q.get("difficulty", "medium"),
+            }
 
-        question_id = existing_by_title.get(q["title"])
-        if question_id:
-            await supabase.table("writing_questions").update(question_payload).eq("id", question_id).execute()
-            updated += 1
-        else:
-            created = (
-                await supabase.table("writing_questions").insert(question_payload).execute()
-            )
-            question_id = created.data[0]["id"]
-            inserted += 1
+            question_id = existing_by_title.get(q["title"])
+            if question_id:
+                await supabase.table("writing_questions").update(question_payload).eq("id", question_id).execute()
+                updated += 1
+            else:
+                created = (
+                    await supabase.table("writing_questions").insert(question_payload).execute()
+                )
+                question_id = created.data[0]["id"]
+                inserted += 1
 
-        # Re-seed this question's samples (safe: nothing references writing_samples)
-        await supabase.table("writing_samples").delete().eq("question_id", question_id).execute()
+            # Re-seed this question's samples (safe: nothing references writing_samples)
+            await supabase.table("writing_samples").delete().eq("question_id", question_id).execute()
 
-        samples = SAMPLES.get(idx, {})
-        for band in ("5", "7", "9"):
-            sample = samples.get(band)
-            if not sample:
-                print(f"  WARNING: no band {band} sample for Q{idx}")
-                continue
-            await supabase.table("writing_samples").insert(
-                {
-                    "question_id": question_id,
-                    "band": sample["band"],
-                    "answer_text": sample["answer_text"],
-                    "task_achievement": sample["task_achievement"],
-                    "coherence_cohesion": sample["coherence_cohesion"],
-                    "lexical_resource": sample["lexical_resource"],
-                    "grammatical_range": sample["grammatical_range"],
-                    "explanation": sample["explanation"],
-                    "improvement_tips": sample["improvement_tips"],
-                }
-            ).execute()
-            total_samples += 1
+            question_samples = samples.get(idx, {})
+            for band in ("5", "7", "9"):
+                sample = question_samples.get(band)
+                if not sample:
+                    print(f"  WARNING: no band {band} sample for part {part} Q{idx}")
+                    continue
+                await supabase.table("writing_samples").insert(
+                    {
+                        "question_id": question_id,
+                        "band": sample["band"],
+                        "answer_text": sample["answer_text"],
+                        "task_achievement": sample["task_achievement"],
+                        "coherence_cohesion": sample["coherence_cohesion"],
+                        "lexical_resource": sample["lexical_resource"],
+                        "grammatical_range": sample["grammatical_range"],
+                        "explanation": sample["explanation"],
+                        "improvement_tips": sample["improvement_tips"],
+                    }
+                ).execute()
+                total_samples += 1
+
+    print("Seeding Task 1 (26 questions)...")
+    await seed(QUESTIONS, SAMPLES, PART1)
+    print("Seeding Task 2 (24 questions)...")
+    await seed(PART2_QUESTIONS, PART2_SAMPLES, PART2)
 
     print(f"Done. Updated {updated}, inserted {inserted} questions, re-seeded {total_samples} samples.")
     if not args.reset:

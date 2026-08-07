@@ -87,9 +87,13 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                           >
                             Writing Task 1 Practice
                           </Link>
-                          <div className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400">
-                            Writing Task 2 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-300">Coming soon</span>
-                          </div>
+                          <Link
+                            href="/student/writing/part2"
+                            onClick={() => setWritingOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                          >
+                            Writing Task 2 Practice
+                          </Link>
                         </div>
                       </>
                     )}
@@ -135,9 +139,13 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                           >
                             Writing Task 1 Review
                           </Link>
-                          <div className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400">
-                            Writing Task 2 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-300">Coming soon</span>
-                          </div>
+                          <Link
+                            href="/teacher/writing/part2"
+                            onClick={() => setWritingOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                          >
+                            Writing Task 2 Review
+                          </Link>
                         </div>
                       </>
                     )}
@@ -171,12 +179,20 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                   Home
                 </Link>
                 {writingHref && (
-                  <Link
-                    href={writingHref}
-                    className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                  >
-                    Writing
-                  </Link>
+                  <>
+                    <Link
+                      href={writingHref}
+                      className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      Writing 1
+                    </Link>
+                    <Link
+                      href="/student/writing/part2"
+                      className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      Writing 2
+                    </Link>
+                  </>
                 )}
                 <Link
                   href="/student/report"
@@ -195,12 +211,20 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                   Dashboard Home
                 </Link>
                 {writingHref && (
-                  <Link
-                    href={writingHref}
-                    className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                  >
-                    Writing
-                  </Link>
+                  <>
+                    <Link
+                      href={writingHref}
+                      className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      Writing 1
+                    </Link>
+                    <Link
+                      href="/teacher/writing/part2"
+                      className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      Writing 2
+                    </Link>
+                  </>
                 )}
               </>
             )}

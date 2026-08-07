@@ -3,7 +3,8 @@
 Collaborative AI-powered IELTS practice. Teachers run live speaking
 rooms; students join with a code, answer IELTS questions by voice, get AI
 feedback, and teachers see a class report. Students can also practise
-**Writing Task 1** independently and receive manual feedback from teachers.
+**Writing Task 1** and **Writing Task 2** independently and receive manual
+feedback from teachers.
 
 Built from `PRD.md`.
 
@@ -14,13 +15,16 @@ Built from `PRD.md`.
   the IELTS band descriptors.
 - **Class reports**: teachers see live progress and a summary of common
   weaknesses; students see their history and audio playback.
-- **Writing Task 1 practice** (not room-bound):
-  - 26 curated questions across all 7 Task 1 types (line, bar, pie, table,
-    map, process, multiple charts).
+- **Writing practice** (not room-bound):
+  - **Task 1**: 26 curated questions across all 7 Task 1 types (line, bar, pie,
+    table, map, process, multiple charts).
+  - **Task 2**: 24 essay questions across all 6 essay types (opinion,
+    discussion, advantages & disadvantages, problem & solution,
+    positive/negative development, two-part questions).
   - 3 model answers per question at Band 5, 7 and 9, each with criterion
     sub-scores, a "why this band" explanation and improvement tips.
-  - Untimed, individual practice with a word counter (150-word target) and
-    draft autosave.
+  - Untimed, individual practice with a word counter (150-word target for
+    Task 1, 250-word target for Task 2) and draft autosave.
   - Multiple teachers can leave feedback on any submission; students see all
     feedback and an overall band.
 
@@ -54,6 +58,7 @@ diagrams live in `frontend/public/writing-images/` and are served by Next.js
    - `backend/migrations/004_answers_evaluations.sql`
    - `backend/migrations/005_criteria.sql`
    - `backend/supabase/migrations/20260805_writing_tables.sql` (writing module)
+   - `backend/supabase/migrations/20260807_writing_part2.sql` (Task 2 support)
 3. Create a **public** storage bucket named `audio` (Storage → New bucket,
    uncheck "restrict file uploads"). Audio recordings live here.
 4. Enable Realtime on the `rooms` and `participants` tables if you want live
@@ -72,7 +77,7 @@ python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt     # Windows
 cp .env.example .env                              # fill in the values
 .venv\Scripts\python -m scripts.seed_criteria
-.venv\Scripts\python -m scripts.seed_writing        # 26 questions + 78 samples
+.venv\Scripts\python -m scripts.seed_writing        # 26 Task 1 + 24 Task 2 questions (150 samples)
 ```
 
 ### Backend env vars (`.env`)
@@ -124,17 +129,18 @@ npm run dev                                       # http://localhost:3000
 5. **Teacher** sees live progress and a class report with average band and
    common problems. **Students** see their history in *My progress*.
 
-### Writing Task 1 practice
+### Writing practice
 
-1. **Student**: open **Writing → Task 1 Practice**, filter by chart type or
-   difficulty, and pick any question.
-2. Read the prompt, study the diagram/chart, and write your answer with the
-   built-in editor (150-word target, draft autosave).
+1. **Student**: open **Writing → Task 1 Practice** or **Task 2 Practice**, filter
+   by type or difficulty, and pick any question.
+2. Read the prompt, study the diagram/chart (Task 1) or essay question (Task 2),
+   and write your answer with the built-in editor (150-word target for Task 1,
+   250-word target for Task 2, draft autosave).
 3. Compare your work with the Band 5 / 7 / 9 sample answers and their
    "why this band" explanations.
 4. Submit for review; any teacher can score it on the 4 IELTS criteria and
    leave feedback. Students see all feedback and the average overall band.
-5. **Teacher**: open **Writing → Task 1 Practice** to review pending
+5. **Teacher**: open **Writing → Task 1** or **Task 2** review to review pending
    submissions and grade them.
 
 ## Deployment

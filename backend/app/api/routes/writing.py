@@ -15,6 +15,17 @@ from app.services import db
 
 router = APIRouter(prefix="/api/writing", tags=["writing"])
 
+TASK1_TYPES = {"line", "bar", "pie", "table", "map", "process", "multi"}
+TASK2_TYPES = {
+    "opinion",
+    "discussion",
+    "advantages",
+    "problem_solution",
+    "positive_negative",
+    "double_question",
+}
+ALL_TYPES = TASK1_TYPES | TASK2_TYPES
+
 
 def _parse_feedback(row: dict, submission_id: str | None = None) -> dict:
     """Normalise a writing_feedback row (possibly nested) into a feedback dict."""
@@ -43,6 +54,7 @@ def _question_out(row: dict) -> WritingQuestionOut:
         data_description=row.get("data_description"),
         image_url=row.get("image_url"),
         difficulty=row.get("difficulty"),
+        part=row.get("part") or 1,
     )
 
 
@@ -50,11 +62,14 @@ def _question_out(row: dict) -> WritingQuestionOut:
 async def list_questions(
     type: str | None = None,
     difficulty: str | None = None,
+    part: int = 1,
     user: CurrentUser = Depends(get_current_user),
 ) -> list[WritingQuestionOut]:
+    allowed_types = TASK1_TYPES if part == 1 else TASK2_TYPES if part == 2 else ALL_TYPES
     rows = await db.list_writing_questions(
-        question_type=type if type in {"line", "bar", "pie", "table", "map", "process", "multi"} else None,
+        question_type=type if type in allowed_types else None,
         difficulty=difficulty if difficulty in {"easy", "medium", "hard"} else None,
+        part=part if part in (1, 2) else None,
     )
     return [_question_out(r) for r in rows]
 
@@ -100,11 +115,13 @@ async def create_submission(
     question = await db.get_writing_question(body.question_id)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
+    part = body.part or question.get("part") or 1
     submission = await db.insert_writing_submission(
         {
             "student_id": user.id,
             "question_id": body.question_id,
             "answer_text": body.answer_text,
+            "part": part,
         }
     )
     return WritingSubmissionOut(
@@ -112,6 +129,7 @@ async def create_submission(
         question_id=submission["question_id"],
         question_title=question["title"],
         question_type=question["type"],
+        part=part,
         answer_text=submission["answer_text"],
         word_count=submission.get("word_count"),
         created_at=submission.get("created_at"),
@@ -122,9 +140,12 @@ async def create_submission(
 
 @router.get("/submissions/me", response_model=list[WritingSubmissionOut])
 async def my_submissions(
+    part: int = 1,
     user: CurrentUser = Depends(get_current_user),
 ) -> list[WritingSubmissionOut]:
-    rows = await db.list_writing_submissions_for_student(user.id)
+    rows = await db.list_writing_submissions_for_student(
+        user.id, part=part if part in (1, 2) else None
+    )
     out: list[WritingSubmissionOut] = []
     for r in rows:
         question = r.get("writing_questions") or {}
@@ -138,6 +159,7 @@ async def my_submissions(
                 question_id=r["question_id"],
                 question_title=question.get("title") if isinstance(question, dict) else None,
                 question_type=question.get("type") if isinstance(question, dict) else None,
+                part=r.get("part") or 1,
                 answer_text=r["answer_text"],
                 word_count=r.get("word_count"),
                 created_at=r.get("created_at"),
@@ -150,9 +172,12 @@ async def my_submissions(
 
 @router.get("/submissions", response_model=list[WritingSubmissionOut])
 async def all_submissions(
+    part: int = 1,
     user: CurrentUser = Depends(require_teacher),
 ) -> list[WritingSubmissionOut]:
-    rows = await db.list_all_writing_submissions()
+    rows = await db.list_all_writing_submissions(
+        part=part if part in (1, 2) else None
+    )
     out: list[WritingSubmissionOut] = []
     for r in rows:
         student = r.get("users") or {}
@@ -161,14 +186,13 @@ async def all_submissions(
         feedback = [_parse_feedback(f, r["id"]) for f in feedback_rows]
         bands = [f["overall_band"] for f in feedback if f["overall_band"]]
         overall = round(sum(bands) / len(bands), 1) if bands else None
-        # Reuse question_title field for the student name so the teacher
-        # list can show who submitted. question_title remains the question title.
         out.append(
             WritingSubmissionOut(
                 id=r["id"],
                 question_id=r["question_id"],
                 question_title=question.get("title") if isinstance(question, dict) else None,
                 question_type=question.get("type") if isinstance(question, dict) else None,
+                part=r.get("part") or 1,
                 answer_text=r["answer_text"],
                 word_count=r.get("word_count"),
                 created_at=r.get("created_at"),
@@ -202,6 +226,7 @@ async def get_submission(
         question_id=submission["question_id"],
         question_title=question.get("title") if isinstance(question, dict) else None,
         question_type=question.get("type") if isinstance(question, dict) else None,
+        part=submission.get("part") or 1,
         question_prompt=question.get("prompt") if isinstance(question, dict) else None,
         question_data=question.get("data_description") if isinstance(question, dict) else None,
         question_image_url=question.get("image_url") if isinstance(question, dict) else None,

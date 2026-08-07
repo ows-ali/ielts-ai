@@ -104,5 +104,5 @@ NEXT_PUBLIC_API_URL=https://your-backend-api.onrender.com
 - [ ] RLS policies enable students to upload `.webm`/`.mp4` recordings.
 - [ ] Supabase Realtime channel connections succeed over WebSockets (`wss://`).
 - [ ] Audio playback URL is accessible via HTTPS on student reports.
-- [ ] Writing migrations applied (`20260805_writing_tables.sql`) and seeded (`scripts.seed_writing`).
+- [ ] Writing migrations applied (`20260805_writing_tables.sql` + `20260807_writing_part2.sql`) and seeded (`scripts.seed_writing`).
 - [ ] Writing diagrams load under `/writing-images/` on the deployed frontend.

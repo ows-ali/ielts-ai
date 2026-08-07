@@ -29,6 +29,12 @@ const TYPE_LABELS: Record<string, string> = {
   map: "Maps",
   process: "Process diagram",
   multi: "Multiple charts",
+  opinion: "Opinion essay",
+  discussion: "Discussion essay",
+  advantages: "Advantages & disadvantages",
+  problem_solution: "Problem & solution",
+  positive_negative: "Positive / negative development",
+  double_question: "Two-part question",
 };
 
 export function TeacherWritingReview({
@@ -92,7 +98,10 @@ export function TeacherWritingReview({
       <Navbar userRole="teacher" userName={userName} />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center gap-2">
-          <Link href="/teacher/writing" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+          <Link
+            href={submission.part === 2 ? "/teacher/writing/part2" : "/teacher/writing"}
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+          >
             ← All submissions
           </Link>
         </div>
@@ -122,10 +131,12 @@ export function TeacherWritingReview({
                     {submission.question_prompt}
                   </p>
                 )}
-                <WritingVisual
-                  data={submission.question_data}
-                  imageUrl={submission.question_image_url}
-                />
+                {submission.part !== 2 && (
+                  <WritingVisual
+                    data={submission.question_data}
+                    imageUrl={submission.question_image_url}
+                  />
+                )}
               </CardContent>
             </Card>
 

@@ -12,6 +12,7 @@ class WritingQuestionOut(BaseModel):
     data_description: dict[str, Any] | None = None
     image_url: str | None = None
     difficulty: str | None = None
+    part: int = 1
 
 
 class WritingSampleOut(BaseModel):
@@ -33,6 +34,7 @@ class WritingQuestionDetailOut(WritingQuestionOut):
 class WritingSubmissionCreate(BaseModel):
     question_id: str
     answer_text: str
+    part: int | None = None
 
 
 class WritingFeedbackOut(BaseModel):
@@ -54,6 +56,7 @@ class WritingSubmissionOut(BaseModel):
     question_id: str
     question_title: str | None = None
     question_type: str | None = None
+    part: int = 1
     answer_text: str
     word_count: int | None = None
     created_at: str | datetime | None = None

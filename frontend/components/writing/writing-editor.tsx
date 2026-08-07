@@ -17,11 +17,13 @@ function countChars(text: string): number {
 
 export function WritingEditor({
   questionId,
+  part = 1,
   onSubmit,
   submitting,
   disabled,
 }: {
   questionId: string;
+  part?: number;
   onSubmit: (text: string) => void;
   submitting?: boolean;
   disabled?: boolean;
@@ -59,9 +61,10 @@ export function WritingEditor({
 
   const words = countWords(text);
   const chars = countChars(text);
-  const meetTarget = words >= 150 && chars >= 150;
+  const target = part === 2 ? 250 : 150;
+  const meetTarget = words >= target && chars >= target;
   const wordTone =
-    words >= 150 ? "text-emerald-600" : words >= 100 ? "text-amber-600" : "text-slate-500";
+    words >= target ? "text-emerald-600" : words >= Math.round(target * 0.67) ? "text-amber-600" : "text-slate-500";
 
   return (
     <div className="space-y-3">
@@ -71,7 +74,7 @@ export function WritingEditor({
           <span className="text-slate-400">{chars} characters</span>
           {!meetTarget && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-              IELTS Task 1 requires at least 150 words
+              IELTS Task {part} requires at least {target} words
             </span>
           )}
         </div>

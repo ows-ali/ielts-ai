@@ -23,6 +23,12 @@ const TYPE_LABELS: Record<string, string> = {
   map: "Maps",
   process: "Process diagram",
   multi: "Multiple charts",
+  opinion: "Opinion essay",
+  discussion: "Discussion essay",
+  advantages: "Advantages & disadvantages",
+  problem_solution: "Problem & solution",
+  positive_negative: "Positive / negative development",
+  double_question: "Two-part question",
 };
 
 export function WritingPractice({
@@ -44,7 +50,7 @@ export function WritingPractice({
     setSubmitting(true);
     setError(null);
     try {
-      await api.submitWriting(session, question.id, text);
+      await api.submitWriting(session, question.id, text, question.part);
       setSubmitted(true);
     } catch (err) {
       await handleUnauthorized(err);
@@ -59,7 +65,10 @@ export function WritingPractice({
       <Navbar userRole="student" userName={userName} />
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex items-center gap-2">
-          <Link href="/student/writing" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+          <Link
+            href={question.part === 2 ? "/student/writing/part2" : "/student/writing"}
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+          >
             ← All questions
           </Link>
         </div>
@@ -83,10 +92,12 @@ export function WritingPractice({
                 <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700">
                   {question.prompt}
                 </p>
-                <WritingVisual
-                  data={question.data_description}
-                  imageUrl={question.image_url}
-                />
+                {question.part !== 2 && (
+                  <WritingVisual
+                    data={question.data_description}
+                    imageUrl={question.image_url}
+                  />
+                )}
               </CardContent>
             </Card>
 
@@ -102,7 +113,13 @@ export function WritingPractice({
                       A teacher will review your answer. Track feedback in your submission history.
                     </p>
                     <div className="mt-4 flex justify-center gap-2">
-                      <Link href="/student/writing/history">
+                      <Link
+                        href={
+                          question.part === 2
+                            ? "/student/writing/part2/history"
+                            : "/student/writing/history"
+                        }
+                      >
                         <Button>View my submissions</Button>
                       </Link>
                       <Button variant="secondary" onClick={() => setSubmitted(false)}>
@@ -114,6 +131,7 @@ export function WritingPractice({
                   <>
                     <WritingEditor
                       questionId={question.id}
+                      part={question.part}
                       onSubmit={handleSubmit}
                       submitting={submitting}
                     />

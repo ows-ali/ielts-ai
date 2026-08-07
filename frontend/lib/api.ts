@@ -119,10 +119,14 @@ export const api = {
   roomScores: (s: Session | null, roomId: string) =>
     request<RoomScoresOut>(`/api/rooms/${roomId}/scores`, s),
 
-  writingQuestions: (s: Session | null, params?: { type?: string; difficulty?: string }) => {
+  writingQuestions: (
+    s: Session | null,
+    params?: { type?: string; difficulty?: string; part?: number }
+  ) => {
     const qs = new URLSearchParams();
     if (params?.type) qs.set("type", params.type);
     if (params?.difficulty) qs.set("difficulty", params.difficulty);
+    if (params?.part) qs.set("part", String(params.part));
     const q = qs.toString();
     return request<WritingQuestion[]>(`/api/writing/questions${q ? `?${q}` : ""}`, s);
   },
@@ -135,17 +139,29 @@ export const api = {
       () => []
     ),
 
-  submitWriting: (s: Session | null, questionId: string, answerText: string) =>
+  submitWriting: (s: Session | null, questionId: string, answerText: string, part?: number) =>
     request<WritingSubmission>("/api/writing/submissions", s, {
       method: "POST",
-      body: JSON.stringify({ question_id: questionId, answer_text: answerText }),
+      body: JSON.stringify({
+        question_id: questionId,
+        answer_text: answerText,
+        ...(part ? { part } : {}),
+      }),
     }),
 
-  myWritingSubmissions: (s: Session | null) =>
-    request<WritingSubmission[]>("/api/writing/submissions/me", s),
+  myWritingSubmissions: (s: Session | null, part?: number) => {
+    const qs = new URLSearchParams();
+    if (part) qs.set("part", String(part));
+    const q = qs.toString();
+    return request<WritingSubmission[]>(`/api/writing/submissions/me${q ? `?${q}` : ""}`, s);
+  },
 
-  allWritingSubmissions: (s: Session | null) =>
-    request<WritingSubmission[]>("/api/writing/submissions", s),
+  allWritingSubmissions: (s: Session | null, part?: number) => {
+    const qs = new URLSearchParams();
+    if (part) qs.set("part", String(part));
+    const q = qs.toString();
+    return request<WritingSubmission[]>(`/api/writing/submissions${q ? `?${q}` : ""}`, s);
+  },
 
   writingSubmission: (s: Session | null, id: string) =>
     request<WritingSubmissionDetail>(`/api/writing/submissions/${id}`, s),

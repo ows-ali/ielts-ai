@@ -18,6 +18,12 @@ const TYPE_LABELS: Record<string, string> = {
   map: "Maps",
   process: "Process diagram",
   multi: "Multiple charts",
+  opinion: "Opinion essay",
+  discussion: "Discussion essay",
+  advantages: "Advantages & disadvantages",
+  problem_solution: "Problem & solution",
+  positive_negative: "Positive / negative development",
+  double_question: "Two-part question",
 };
 
 export function WritingSubmissionView({
@@ -64,10 +70,12 @@ export function WritingSubmissionView({
                 {submission.question_prompt}
               </p>
             )}
-            <WritingVisual
-              data={submission.question_data}
-              imageUrl={submission.question_image_url}
-            />
+            {submission.part !== 2 && (
+              <WritingVisual
+                data={submission.question_data}
+                imageUrl={submission.question_image_url}
+              />
+            )}
           </CardContent>
         </Card>
 
@@ -99,7 +107,9 @@ export function WritingSubmissionView({
               )}
             </h2>
             {!hasFeedback && (
-              <Link href="/student/writing">
+              <Link
+                href={submission.part === 2 ? "/student/writing/part2" : "/student/writing"}
+              >
                 <Button variant="secondary">Practice another question</Button>
               </Link>
             )}

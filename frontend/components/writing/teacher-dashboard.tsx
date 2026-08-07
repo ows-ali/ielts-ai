@@ -19,9 +19,15 @@ const TYPE_LABELS: Record<string, string> = {
   map: "Map",
   process: "Process",
   multi: "Mixed",
+  opinion: "Opinion",
+  discussion: "Discussion",
+  advantages: "Advantages",
+  problem_solution: "Problem/Solution",
+  positive_negative: "Positive/Negative",
+  double_question: "Two-part",
 };
 
-export function TeacherWritingDashboard({ session }: { session: Session }) {
+export function TeacherWritingDashboard({ session, part = 1 }: { session: Session; part?: number }) {
   const [submissions, setSubmissions] = useState<WritingSubmission[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "reviewed">("all");
@@ -31,7 +37,7 @@ export function TeacherWritingDashboard({ session }: { session: Session }) {
   useEffect(() => {
     let mounted = true;
     api
-      .allWritingSubmissions(session)
+      .allWritingSubmissions(session, part)
       .then((rows) => {
         if (mounted) setSubmissions(rows);
       })
@@ -45,7 +51,7 @@ export function TeacherWritingDashboard({ session }: { session: Session }) {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session, part]);
 
   if (!submissions) {
     return (
@@ -102,7 +108,7 @@ export function TeacherWritingDashboard({ session }: { session: Session }) {
           <CardContent className="py-12 text-center">
             <p className="text-slate-500">
               {submissions.length === 0
-                ? "No writing submissions yet. Share the Writing Task 1 practice page with your students."
+                ? `No writing submissions yet. Share the Writing Task ${part} practice page with your students.`
                 : "No submissions match this filter."}
             </p>
           </CardContent>

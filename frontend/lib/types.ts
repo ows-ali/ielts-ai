@@ -112,13 +112,20 @@ export type WritingQuestionType =
   | "table"
   | "map"
   | "process"
-  | "multi";
+  | "multi"
+  | "opinion"
+  | "discussion"
+  | "advantages"
+  | "problem_solution"
+  | "positive_negative"
+  | "double_question";
 
 export interface WritingQuestion {
   id: string;
   type: WritingQuestionType;
   title: string;
   prompt: string;
+  part: number;
   data_description?: Record<string, unknown> | null;
   image_url?: string | null;
   difficulty?: string | null;
@@ -159,6 +166,7 @@ export interface WritingSubmission {
   question_id: string;
   question_title?: string | null;
   question_type?: string | null;
+  part: number;
   answer_text: string;
   word_count?: number | null;
   created_at?: string | null;

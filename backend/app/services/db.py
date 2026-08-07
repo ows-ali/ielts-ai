@@ -256,7 +256,7 @@ async def list_evaluations_for_room(room_id: str) -> list[dict]:
 
 
 async def list_writing_questions(
-    question_type: str | None = None, difficulty: str | None = None
+    question_type: str | None = None, difficulty: str | None = None, part: int | None = None
 ) -> list[dict]:
     client = await _client()
     query = client.table("writing_questions").select("*").order("created_at")
@@ -264,6 +264,8 @@ async def list_writing_questions(
         query = query.eq("type", question_type)
     if difficulty:
         query = query.eq("difficulty", difficulty)
+    if part:
+        query = query.eq("part", part)
     data = await query.execute()
     return data.data or []
 
@@ -298,39 +300,36 @@ async def insert_writing_submission(payload: dict) -> dict:
     return data.data[0]
 
 
-async def list_writing_submissions_for_student(student_id: str) -> list[dict]:
+async def list_writing_submissions_for_student(
+    student_id: str, part: int | None = None
+) -> list[dict]:
     client = await _client()
-    data = (
-        await client.table("writing_submissions")
-        .select(
-            "id, question_id, answer_text, word_count, created_at, "
-            "writing_questions(type, title), "
-            "writing_feedback(id, teacher_id, task_achievement, coherence_cohesion, "
-            "lexical_resource, grammatical_range, overall_band, overall_comment, created_at, "
-            "users(name))"
-        )
-        .eq("student_id", student_id)
-        .order("created_at", desc=True)
-        .execute()
-    )
+    query = client.table("writing_submissions").select(
+        "id, question_id, part, answer_text, word_count, created_at, "
+        "writing_questions(type, title), "
+        "writing_feedback(id, teacher_id, task_achievement, coherence_cohesion, "
+        "lexical_resource, grammatical_range, overall_band, overall_comment, created_at, "
+        "users(name))"
+    ).eq("student_id", student_id)
+    if part:
+        query = query.eq("part", part)
+    data = await query.order("created_at", desc=True).execute()
     return data.data or []
 
 
-async def list_all_writing_submissions() -> list[dict]:
+async def list_all_writing_submissions(part: int | None = None) -> list[dict]:
     """List submissions with student info, for teachers."""
     client = await _client()
-    data = (
-        await client.table("writing_submissions")
-        .select(
-            "id, student_id, question_id, answer_text, word_count, created_at, "
-            "users(name), "
-            "writing_questions(type, title), "
-            "writing_feedback(id, task_achievement, coherence_cohesion, lexical_resource, "
-            "grammatical_range, overall_band, overall_comment, teacher_id, created_at, users(name))"
-        )
-        .order("created_at", desc=True)
-        .execute()
+    query = client.table("writing_submissions").select(
+        "id, student_id, question_id, part, answer_text, word_count, created_at, "
+        "users(name), "
+        "writing_questions(type, title), "
+        "writing_feedback(id, task_achievement, coherence_cohesion, lexical_resource, "
+        "grammatical_range, overall_band, overall_comment, teacher_id, created_at, users(name))"
     )
+    if part:
+        query = query.eq("part", part)
+    data = await query.order("created_at", desc=True).execute()
     return data.data or []
 
 
@@ -339,7 +338,7 @@ async def get_writing_submission(submission_id: str) -> dict | None:
     data = (
         await client.table("writing_submissions")
         .select(
-            "id, student_id, question_id, answer_text, word_count, created_at, "
+            "id, student_id, question_id, part, answer_text, word_count, created_at, "
             "writing_questions(type, title, prompt, data_description, image_url, difficulty), "
             "writing_feedback(id, teacher_id, task_achievement, coherence_cohesion, "
             "lexical_resource, grammatical_range, overall_band, overall_comment, created_at, "
