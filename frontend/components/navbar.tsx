@@ -144,6 +144,12 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                   Community
                 </Link>
                 <Link
+                  href="/guide"
+                  className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-indigo-600"
+                >
+                  Guide
+                </Link>
+                <Link
                   href="/profile"
                   className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-indigo-600"
                 >
@@ -254,6 +260,12 @@ export function Navbar({ userRole, userName }: NavbarProps) {
                   className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                 >
                   Community
+                </Link>
+                <Link
+                  href="/guide"
+                  className="rounded-full bg-slate-100/80 px-3.5 py-1 text-xs font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                >
+                  Guide
                 </Link>
                 <Link
                   href="/profile"

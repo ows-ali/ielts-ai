@@ -1,13 +1,24 @@
 import Link from "next/link";
 
+import { ContextualGuide } from "@/components/guide/contextual-guide";
 import { WritingDashboard } from "@/components/writing/student-dashboard";
 import { Navbar } from "@/components/navbar";
+import { api } from "@/lib/api";
 import { requireStudent } from "@/lib/auth";
+import { currentBandFor, writingTask2Topic } from "@/lib/guide";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentWritingPart2Page() {
   const { user, session } = await requireStudent();
+
+  let bandInfo;
+  try {
+    const badges = await api.myBadges(session);
+    bandInfo = currentBandFor("writing-task2", badges.stats);
+  } catch {
+    bandInfo = currentBandFor("writing-task2", null);
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -34,6 +45,14 @@ export default async function StudentWritingPart2Page() {
               My submissions →
             </Link>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <ContextualGuide
+            topic={writingTask2Topic}
+            bandInfo={bandInfo}
+            title="How to attempt Writing Task 2"
+          />
         </div>
 
         <WritingDashboard session={session} part={2} />

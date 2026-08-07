@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ContextualGuide } from "@/components/guide/contextual-guide";
 import { JoinRoomForm } from "@/components/student/join-room-form";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LazyAudio } from "@/components/ui/lazy-audio";
 import { api } from "@/lib/api";
 import { requireStudent } from "@/lib/auth";
+import { currentBandFor, speakingTopic } from "@/lib/guide";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,14 @@ export default async function StudentSpeakingPage() {
     attempts = report.attempts || [];
   } catch {
     attempts = [];
+  }
+
+  let bandInfo;
+  try {
+    const badges = await api.myBadges(session);
+    bandInfo = currentBandFor("speaking", badges.stats);
+  } catch {
+    bandInfo = currentBandFor("speaking", null);
   }
 
   return (
@@ -47,6 +57,12 @@ export default async function StudentSpeakingPage() {
         </div>
 
         <div className="mt-6 grid gap-6">
+          <ContextualGuide
+            topic={speakingTopic}
+            bandInfo={bandInfo}
+            title="How to attempt the Speaking test"
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>Join a session</CardTitle>
