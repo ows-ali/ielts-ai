@@ -55,7 +55,7 @@ python -m scripts.test_flow
 
 ### E2E Flow Test Steps
 1. **Supabase Connectivity**: Verifies connection to PostgreSQL database.
-2. **Auth Verification**: Signs in dummy teacher (`teacher1@example.com`) and student (`student1@example.com`).
+2. **Auth Verification**: Signs in dummy teacher (`teacher1@example.com`, password `TeacherSecure#2026`) and student (`student1@example.com`, password `DummyPass123!`).
 3. **Room Creation**: Teacher creates a Part 1 speaking room (`POST /api/rooms`).
 4. **Student Join**: Student joins room via code (`POST /api/rooms/join`).
 5. **Participant Roster**: Verifies participant list (`GET /api/rooms/{id}/participants`).

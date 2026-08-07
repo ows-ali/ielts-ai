@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_PASSWORD = "DummyPass123!"
+TEACHER_PASSWORD = "TeacherSecure#2026"
 
 
 def create_users(role: str, count: int, password: str, supabase_url: str, service_key: str) -> None:
@@ -55,6 +56,7 @@ def main() -> None:
     parser.add_argument("--teachers", type=int, default=2)
     parser.add_argument("--students", type=int, default=2)
     parser.add_argument("--password", default=DEFAULT_PASSWORD)
+    parser.add_argument("--teacher-password", default=TEACHER_PASSWORD)
     args = parser.parse_args()
 
     supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
@@ -62,9 +64,10 @@ def main() -> None:
     if not supabase_url or not service_key:
         raise SystemExit("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env")
 
-    create_users("teacher", args.teachers, args.password, supabase_url, service_key)
+    create_users("teacher", args.teachers, args.teacher_password, supabase_url, service_key)
     create_users("student", args.students, args.password, supabase_url, service_key)
-    print(f"\nPassword for all accounts: {args.password}")
+    print(f"\nTeacher password: {args.teacher_password}")
+    print(f"Student password: {args.password}")
 
 
 if __name__ == "__main__":

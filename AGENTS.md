@@ -42,7 +42,7 @@ alter publication supabase_realtime add table public.rooms, public.participants;
 - ✅ Backend e2e: 12/12 passing (real Supabase + Gemini)
 - ✅ 401 handling: `useUnauthorizedRedirect` hook + 5 components + 4 tests
 - ✅ Polling removed (realtime-only updates)
-- ✅ Dummy users: teacher1/2, student1/2 (password: DummyPass123!)
+- ✅ Dummy users: teacher1/2 (password: TeacherSecure#2026), student1/2 (password: DummyPass123!)
 - ✅ Servers stopped (ports 3000/8000 free)
 - ✅ Teacher home button added to room header navigation
 - ✅ Student reports with audio playback controls added

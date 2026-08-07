@@ -9,8 +9,6 @@ import { Input, Label } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
 const DEMO_ACCOUNTS = [
-  { role: "Teacher 1", email: "teacher1@example.com", pass: "DummyPass123!", color: "indigo" },
-  { role: "Teacher 2", email: "teacher2@example.com", pass: "DummyPass123!", color: "indigo" },
   { role: "Student 1", email: "student1@example.com", pass: "DummyPass123!", color: "emerald" },
   { role: "Student 2", email: "student2@example.com", pass: "DummyPass123!", color: "emerald" },
 ];

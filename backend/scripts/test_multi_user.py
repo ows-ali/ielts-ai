@@ -17,18 +17,19 @@ API = "http://localhost:8000"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 PASSWORD = "DummyPass123!"
+TEACHER_PASSWORD = "TeacherSecure#2026"
 
 TEACHER_EMAIL = "teacher1@example.com"
 STUDENT1_EMAIL = "student1@example.com"
 STUDENT2_EMAIL = "student2@example.com"
 
 
-def login(http: httpx.Client, email: str) -> str:
+def login(http: httpx.Client, email: str, password: str = PASSWORD) -> str:
     headers = {"apikey": ANON_KEY, "Content-Type": "application/json"}
     resp = http.post(
         f"{SUPABASE_URL}/auth/v1/token?grant_type=password",
         headers=headers,
-        json={"email": email, "password": PASSWORD},
+        json={"email": email, "password": password},
     )
     resp.raise_for_status()
     return resp.json()["access_token"]
@@ -52,7 +53,7 @@ def run():
     print("=== Multi-User E2E Verification (1 Teacher, 2 Students) ===")
     with httpx.Client(timeout=120.0) as http:
         print("[1] Logging in test accounts...")
-        teacher_token = login(http, TEACHER_EMAIL)
+        teacher_token = login(http, TEACHER_EMAIL, TEACHER_PASSWORD)
         student1_token = login(http, STUDENT1_EMAIL)
         student2_token = login(http, STUDENT2_EMAIL)
 
